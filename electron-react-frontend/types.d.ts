@@ -1,33 +1,25 @@
-type Statistics = {
+type SystemResourceUsage = {
 	cpuUsage: number;
 	ramUsage: number;
-	storageUsage: number;
 };
 
-type StaticData = {
+type SystemInfo = {
 	cpuModel: string;
 	totalMemoryGB: number;
-	totalStorage: number;
 };
 
-type View = 'CPU' | 'RAM' | 'Storage';
-
 type EventPayloadMapping = {
-	statistics: Statistics;
-	getStaticData: StaticData;
-	changeView: View;
+	getSystemResourceUsage: SystemResourceUsage;
+	getSystemInfo: SystemInfo;
 };
 
 type UnsubscribeFunction = () => void;
 
 interface Window {
 	electron: {
-		subscribeStatistics: (
-			callback: (statistics: Statistics) => void
-		) => UnsubscribeFunction;
-		getStaticData: () => Promise<StaticData>;
-		subscribeChangeView: (
-			callback: (view: View) => void
+		getSystemInfo: () => Promise<SystemInfo>;
+		subscribeGetSystemResourceUsage: (
+			callback: (systemResourceUsage: SystemResourceUsage) => void
 		) => UnsubscribeFunction;
 	};
 }

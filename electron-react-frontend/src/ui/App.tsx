@@ -1,12 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import './App.css'
 import { Chart } from './Chart';
-import { statistics } from './statistics';
+import { getSystemInfo, subscribeGetSystemResourceUsage } from './systemResourcesInfo';
+import { InputGrid } from './inputGrid';
+
 
 function App() {
-  const staticData = getStaticData();
-  const stats = statistics(10);
-  const [activeView, setActiveView] = useState<View>('CPU');
+  const staticData = getSystemInfo();
+  const systemResourceUsageDataPointCount = 10;
+  const stats = subscribeGetSystemResourceUsage(systemResourceUsageDataPointCount);
+
   const cpuUsageArray = useMemo(
     () => stats.map((stat) => stat.cpuUsage * 100),
     [stats]
@@ -15,93 +18,32 @@ function App() {
     () => stats.map((stat) => stat.ramUsage * 100),
     [stats]
   );
-  const storageUsageArray = useMemo(
-    () => stats.map((stat) => stat.storageUsage * 100),
-    [stats]
-  );
-  const activeViewUsageArray = useMemo(() => {
-    switch (activeView) {
-      case 'CPU':
-        return cpuUsageArray;
-      case 'RAM':
-        return ramUsageArray;
-      case 'Storage':
-        return storageUsageArray;
-    }
-  }, [activeView, cpuUsageArray, ramUsageArray, storageUsageArray]);
-
-  useEffect(() => {
-    return window.electron.subscribeChangeView((view) => setActiveView(view));
-  }, []);
 
   return (
     <>
       <div className="main">
         <div>
-          <SelectOption
-            onClick={() => setActiveView('CPU')}
-            title="CPU"
+          <Chart
             view="CPU"
-            subTitle={staticData?.cpuModel ?? ''}
+            title="CPU"
+            subTitle={staticData?.cpuModel ?? 'CPU model not reported'}
             data={cpuUsageArray}
+            maxDataPoints={systemResourceUsageDataPointCount}
           />
-          <SelectOption
-            onClick={() => setActiveView('RAM')}
-            title="RAM"
+          <Chart
             view="RAM"
+            title="RAM"
             subTitle={(staticData?.totalMemoryGB.toString() ?? '') + ' GB'}
             data={ramUsageArray}
-          />
-          <SelectOption
-            onClick={() => setActiveView('Storage')}
-            title="Storage"
-            view="Storage"
-            subTitle={(staticData?.totalStorage.toString() ?? '') + ' GB'}
-            data={storageUsageArray}
+            maxDataPoints={systemResourceUsageDataPointCount}
           />
         </div>
         <div className="mainGrid">
-          <Chart
-            selectedView={activeView}
-            data={activeViewUsageArray}
-            maxDataPoints={10}
-          />
+          <InputGrid />
         </div>
       </div>
     </>
   );
-}
-
-function SelectOption(props: {
-  title: string;
-  view: View;
-  subTitle: string;
-  data: number[];
-  onClick: () => void;
-}) {
-  return (
-    <button className="selectOption" onClick={props.onClick}>
-      <div className="selectOptionTitle">
-        <div>{props.title}</div>
-        <div>{props.subTitle}</div>
-      </div>
-      <div className="selectOptionChart">
-        <Chart selectedView={props.view} data={props.data} maxDataPoints={10} />
-      </div>
-    </button>
-  );
-}
-
-function getStaticData() {
-  const [staticData, setStaticData] = useState<StaticData | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      setStaticData(await window.electron.getStaticData());
-    })();
-  }, []);
-
-  return staticData;
 }
 
 export default App

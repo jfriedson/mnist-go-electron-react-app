@@ -1,10 +1,16 @@
+import './Chart.css'
 import { useMemo } from "react";
 import { BaseChart } from "./BaseChart";
 
+
+export type View = "CPU" | "RAM";
+
 interface ChartProps {
-    selectedView: View;
-    data: number[];
-    maxDataPoints: number;
+  view: View;
+  title: string;
+  subTitle: string;
+  data: number[];
+  maxDataPoints: number;
 }
 
 const COLOR_MAP = {
@@ -23,20 +29,27 @@ const COLOR_MAP = {
 };
 
 export function Chart(props: ChartProps) {
-    const color = useMemo(
-        () => COLOR_MAP[props.selectedView],
-        [props.selectedView]
-    );
+  const color = COLOR_MAP[props.view];
 
-    const preparedData = useMemo(() => {
-        const points = props.data.map((point) => ({ value: point }));
-        return [
-            ...points,
-            ...Array.from({ length: props.maxDataPoints - points.length }).map(
-                () => ({ value: undefined })
-            ),
-        ];
-    }, [props.data, props.maxDataPoints]);
+  const preparedData = useMemo(() => {
+    const points = props.data.map((point) => ({ value: point }));
+    return [
+      ...points,
+      ...Array.from({ length: props.maxDataPoints - points.length }).map(
+        () => ({ value: undefined })
+      ),
+    ];
+  }, [props.data, props.maxDataPoints]);
 
-    return <BaseChart data={preparedData} fill={color.fill} stroke={color.stroke} />;
+  return (
+    <>
+      <div className="chartTitle">
+        <div>{props.title}</div>
+        <div>{props.subTitle}</div>
+      </div>
+      <div className="chart">
+        <BaseChart data={preparedData} fill={color.fill} stroke={color.stroke} />
+      </div>
+    </>
+  );
 }

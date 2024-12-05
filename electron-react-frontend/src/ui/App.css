@@ -5,48 +5,10 @@
   align-items: center;
   margin: 1rem;
   max-width: 900px;
-  margin: auto;
-  margin-top: 4rem;
+  margin: 2rem;
 }
 
 .mainGrid {
-  height: 10rem;
+  height: 100%;
   padding: 0.5rem;
-}
-
-.selectOption {
-  display: block;
-  padding: 0.5rem;
-  width: 100%;
-  background-color: #2c2c2c;
-  margin: 0.5rem 0;
-  border-radius: 0.5rem;
-  cursor: pointer;
-}
-
-.selectOption:hover {
-  background-color: #333;
-}
-
-.selectOptionTitle {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.selectOptionTitle :first-child {
-  font-weight: 600;
-}
-
-.selectOptionTitle :nth-child(2) {
-  font-weight: 400;
-  font-size: 0.8rem;
-}
-
-.selectOptionChart {
-  height: 2rem;
-  width: 100%;
-}
-
-.selectOptionChart * {
-  cursor: pointer;
 }

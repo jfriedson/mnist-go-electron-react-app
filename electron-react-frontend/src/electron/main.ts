@@ -1,10 +1,11 @@
 import { app, BrowserWindow } from 'electron';
 import { ipcMainHandle, isDev } from './util.js';
-import { getStaticData, pollResources } from './resourceManager.js';
 import { getPreloadPath, getUIPath } from './pathResolver.js';
 import { createMenu } from './menu.js';
+import { getSystemInfo, getSystemResourceUsage } from './resourceManager.js';
 
-//Menu.setApplicationMenu(null);
+
+const POLLING_INTERVAL = 500;
 
 app.on("ready", () => {
     const mainWindow = new BrowserWindow({
@@ -19,10 +20,12 @@ app.on("ready", () => {
         mainWindow.loadFile(getUIPath());
     }
 
-    pollResources(mainWindow);
+    setInterval(async () => {
+		getSystemResourceUsage(mainWindow);
+	}, POLLING_INTERVAL);
 
-    ipcMainHandle('getStaticData', () => {
-        return getStaticData();
+    ipcMainHandle('getSystemInfo', () => {
+        return getSystemInfo();
     });
 
     createMenu(mainWindow);

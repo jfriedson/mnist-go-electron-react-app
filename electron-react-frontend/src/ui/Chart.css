@@ -1,0 +1,26 @@
+.chart {
+    display: block;
+    padding: 0.5rem;
+    height: 4rem;
+    width: 100%;
+    background-color: #2c2c2c;
+    margin: 0.5rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.chartTitle {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chartTitle :first-child {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.chartTitle :nth-child(2) {
+    font-weight: 400;
+    font-size: 0.8rem;
+}
