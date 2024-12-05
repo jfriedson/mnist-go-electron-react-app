@@ -42,7 +42,7 @@ export function Chart(props: ChartProps) {
   }, [props.data, props.maxDataPoints]);
 
   return (
-    <>
+    <div>
       <div className="chartTitle">
         <div>{props.title}</div>
         <div>{props.subTitle}</div>
@@ -50,6 +50,6 @@ export function Chart(props: ChartProps) {
       <div className="chart">
         <BaseChart data={preparedData} fill={color.fill} stroke={color.stroke} />
       </div>
-    </>
+    </div>
   );
 }

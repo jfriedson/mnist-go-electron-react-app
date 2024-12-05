@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import { ipcMainHandle, isDev } from './util.js';
 import { getPreloadPath, getUIPath } from './pathResolver.js';
 import { createMenu } from './menu.js';
-import { getSystemInfo, getSystemResourceUsage } from './resourceManager.js';
+import { getSystemInfo, getSystemResourceUsage } from './systemResources.js';
 
 
 const POLLING_INTERVAL = 500;

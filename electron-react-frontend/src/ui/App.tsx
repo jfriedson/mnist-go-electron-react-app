@@ -1,48 +1,55 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { Chart } from './Chart';
 import { getSystemInfo, subscribeGetSystemResourceUsage } from './systemResourcesInfo';
-import { InputGrid } from './inputGrid';
+import { InputGrid } from './InputGrid';
 
 
 function App() {
-  const staticData = getSystemInfo();
+  const systemInfo = getSystemInfo();
   const systemResourceUsageDataPointCount = 10;
-  const stats = subscribeGetSystemResourceUsage(systemResourceUsageDataPointCount);
+  const systemResourceUsage = subscribeGetSystemResourceUsage();
+  const [cpuUsageArray, setCpuUsageArray] = useState(Array<number>());
+  const [ramUsageArray, setRamUsageArray] = useState(Array<number>());
+  
+  useMemo(() => {
+    if (systemResourceUsage === undefined)
+      return;
 
-  const cpuUsageArray = useMemo(
-    () => stats.map((stat) => stat.cpuUsage * 100),
-    [stats]
-  );
-  const ramUsageArray = useMemo(
-    () => stats.map((stat) => stat.ramUsage * 100),
-    [stats]
-  );
+    var newCpuUsageArray = [...cpuUsageArray, systemResourceUsage.cpuUsage * 100];
+    if (newCpuUsageArray.length > systemResourceUsageDataPointCount)
+      newCpuUsageArray.shift();
+    setCpuUsageArray(newCpuUsageArray);
+
+    var newRamUsageArray = [...ramUsageArray, systemResourceUsage.cpuUsage  * 100];
+    if (newRamUsageArray.length > systemResourceUsageDataPointCount)
+      newRamUsageArray.shift();
+    setRamUsageArray(newRamUsageArray);
+
+  }, [systemResourceUsage]);
 
   return (
-    <>
-      <div className="main">
-        <div>
-          <Chart
-            view="CPU"
-            title="CPU"
-            subTitle={staticData?.cpuModel ?? 'CPU model not reported'}
-            data={cpuUsageArray}
-            maxDataPoints={systemResourceUsageDataPointCount}
-          />
-          <Chart
-            view="RAM"
-            title="RAM"
-            subTitle={(staticData?.totalMemoryGB.toString() ?? '') + ' GB'}
-            data={ramUsageArray}
-            maxDataPoints={systemResourceUsageDataPointCount}
-          />
-        </div>
-        <div className="mainGrid">
-          <InputGrid />
-        </div>
+    <div id="app">
+      <div id="appSidebar">
+        <Chart
+          view="CPU"
+          title="CPU"
+          subTitle={systemInfo?.cpuModel ?? 'CPU model not reported'}
+          data={cpuUsageArray}
+          maxDataPoints={systemResourceUsageDataPointCount}
+        />
+        <Chart
+          view="RAM"
+          title="RAM"
+          subTitle={(systemInfo?.totalMemoryGB.toString() ?? 'Unreported') + ' GB'}
+          data={ramUsageArray}
+          maxDataPoints={systemResourceUsageDataPointCount}
+        />
       </div>
-    </>
+      <div id="appMain">
+        <InputGrid />
+      </div>
+    </div>
   );
 }
 

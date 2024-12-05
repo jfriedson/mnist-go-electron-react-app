@@ -17,7 +17,7 @@ export async function getSystemResourceUsage(mainWindow: BrowserWindow) {
 
 export function getSystemInfo() {
 	const cpuModel = os.cpus()[0].model;
-	const totalMemoryGB = Math.floor(osUtils.totalmem() / 1_000);
+	const totalMemoryGB = +(osUtils.totalmem() / 1_024).toFixed(1);
 
 	return {
 		cpuModel,
@@ -27,10 +27,10 @@ export function getSystemInfo() {
 
 function getCpuUsage(): Promise<number> {
     return new Promise(resolve => {
-        osUtils.cpuUsage(resolve)
+		osUtils.cpuUsage(resolve);
     });
 }
 
 function getRamUsage() {
-    return 1 - osUtils.freememPercentage();
+	return 1 - osUtils.freememPercentage();
 }

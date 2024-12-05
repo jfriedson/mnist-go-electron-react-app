@@ -1,14 +1,18 @@
-.main {
+#app {
   display: grid;
   grid-template-columns: 16rem auto;
-  gap: 1rem;
+  gap: 2rem;
   align-items: center;
-  margin: 1rem;
-  max-width: 900px;
   margin: 2rem;
 }
 
-.mainGrid {
+#appSidebar > :not(:last-child) {
+  margin-bottom: 2rem;
+}
+
+#appMain {
+  width: 100%;
   height: 100%;
-  padding: 0.5rem;
+  min-width: 10rem;
+  min-height: 10rem;
 }
