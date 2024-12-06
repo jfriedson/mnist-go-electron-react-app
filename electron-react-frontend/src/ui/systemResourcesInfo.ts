@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from 'react';
 
-export function getSystemInfo() {
+export function getSystemInfo(): SystemInfo | null {
 	const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
 
 	useEffect(() => {
@@ -18,9 +18,7 @@ export function subscribeGetSystemResourceUsage(): SystemResourceUsage | undefin
 
 	useEffect(() => {
 		const unsub = window.electron.subscribeGetSystemResourceUsage((stats) =>
-			setSystemResourceUsage(() => {
-				return stats;
-			})
+			setSystemResourceUsage(stats)
 		);
 		return unsub;
 	}, []);

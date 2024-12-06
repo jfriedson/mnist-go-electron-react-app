@@ -1,13 +1,12 @@
 import './Chart.css'
-import { useMemo } from "react";
-import { BaseChart } from "./BaseChart";
+import { useMemo } from 'react';
+import { BaseChart } from './BaseChart';
 
 
-export type View = "CPU" | "RAM";
+export type View = 'CPU' | 'RAM';
 
 interface ChartProps {
   view: View;
-  title: string;
   subTitle: string;
   data: number[];
   maxDataPoints: number;
@@ -43,11 +42,11 @@ export function Chart(props: ChartProps) {
 
   return (
     <div>
-      <div className="chartTitle">
-        <div>{props.title}</div>
+      <div className='chartTitle'>
+        <div>{props.view}</div>
         <div>{props.subTitle}</div>
       </div>
-      <div className="chart">
+      <div className='chart'>
         <BaseChart data={preparedData} fill={color.fill} stroke={color.stroke} />
       </div>
     </div>

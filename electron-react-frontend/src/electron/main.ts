@@ -7,7 +7,7 @@ import { getSystemInfo, getSystemResourceUsage } from './systemResources.js';
 
 const POLLING_INTERVAL = 500;
 
-app.on("ready", () => {
+app.on('ready', () => {
     const mainWindow = new BrowserWindow({
         webPreferences: {
             preload: getPreloadPath(),

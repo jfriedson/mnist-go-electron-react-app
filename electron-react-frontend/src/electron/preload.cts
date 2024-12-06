@@ -1,13 +1,13 @@
 const electron = require('electron');
 
 
-electron.contextBridge.exposeInMainWorld("electron", {
-	getSystemInfo: () => ipcInvoke("getSystemInfo"),
+electron.contextBridge.exposeInMainWorld('electron', {
+	getSystemInfo: () => ipcInvoke('getSystemInfo'),
 	subscribeGetSystemResourceUsage: (callback) =>
-		ipcOn("getSystemResourceUsage", (stats) => {
+		ipcOn('getSystemResourceUsage', (stats) => {
 			callback(stats);
 		}),
-} satisfies Window["electron"]);
+} satisfies Window['electron']);
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
 	key: Key, 

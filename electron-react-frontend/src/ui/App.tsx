@@ -1,56 +1,82 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import { Chart } from './Chart';
 import { getSystemInfo, subscribeGetSystemResourceUsage } from './systemResourcesInfo';
 import { InputGrid } from './InputGrid';
 
 
+const systemResourceUsageDataPointCount = 10;
+
 function App() {
   const systemInfo = getSystemInfo();
-  const systemResourceUsageDataPointCount = 10;
   const systemResourceUsage = subscribeGetSystemResourceUsage();
-  const [cpuUsageArray, setCpuUsageArray] = useState(Array<number>());
-  const [ramUsageArray, setRamUsageArray] = useState(Array<number>());
+  const [cpuUsageArray, setCpuUsageArray] = useState<number[]>([]);
+  const [ramUsageArray, setRamUsageArray] = useState<number[]>([]);
   
-  useMemo(() => {
+  useEffect(() => {
     if (systemResourceUsage === undefined)
       return;
 
-    var newCpuUsageArray = [...cpuUsageArray, systemResourceUsage.cpuUsage * 100];
-    if (newCpuUsageArray.length > systemResourceUsageDataPointCount)
-      newCpuUsageArray.shift();
-    setCpuUsageArray(newCpuUsageArray);
+    const updateArray = (oldArray: number[], newValue: number) => {
+      var newArray = [...oldArray, newValue];
+      if (newArray.length > systemResourceUsageDataPointCount)
+        newArray.shift();
+      return newArray;
+    }
 
-    var newRamUsageArray = [...ramUsageArray, systemResourceUsage.cpuUsage  * 100];
-    if (newRamUsageArray.length > systemResourceUsageDataPointCount)
-      newRamUsageArray.shift();
-    setRamUsageArray(newRamUsageArray);
-
+    setCpuUsageArray(updateArray(cpuUsageArray, systemResourceUsage.cpuUsage * 100));
+    setRamUsageArray(updateArray(ramUsageArray, systemResourceUsage.ramUsage * 100));
   }, [systemResourceUsage]);
 
   return (
-    <div id="app">
-      <div id="appSidebar">
+    <div id='app'>
+      <div id='appSidebar'>
         <Chart
-          view="CPU"
-          title="CPU"
-          subTitle={systemInfo?.cpuModel ?? 'CPU model not reported'}
+          view='CPU'
+          subTitle={cpuChartSubtitle(systemInfo?.cpuModel, systemResourceUsage?.cpuUsage)}
           data={cpuUsageArray}
           maxDataPoints={systemResourceUsageDataPointCount}
         />
         <Chart
-          view="RAM"
-          title="RAM"
-          subTitle={(systemInfo?.totalMemoryGB.toString() ?? 'Unreported') + ' GB'}
+          view='RAM'
+          subTitle={ramChartSubtitle(systemResourceUsage?.ramUsage, systemInfo?.totalMemoryGB)}
           data={ramUsageArray}
           maxDataPoints={systemResourceUsageDataPointCount}
         />
       </div>
-      <div id="appMain">
+      <div id='appMain'>
         <InputGrid />
       </div>
     </div>
   );
+}
+
+function cpuChartSubtitle(cpuModel: string | undefined, cpuUsage: number | undefined) {
+  if (cpuModel === undefined || cpuUsage === undefined) {
+    if (cpuModel !== undefined)
+      return cpuModel;
+
+    if (cpuUsage !== undefined)
+      return (cpuUsage * 100).toFixed(1) + '%';
+    
+    return 'Unreported';
+  }
+
+  return cpuModel + ' - ' + (cpuUsage * 100).toFixed(1) + '%';
+}
+
+function ramChartSubtitle(ramUsage: number | undefined, ramTotal: number | undefined) {
+  if (ramUsage === undefined || ramTotal === undefined) {
+    if (ramTotal !== undefined)
+      return ramTotal.toString() + ' GB';
+
+    if (ramUsage !== undefined)
+      return (ramUsage * 100).toFixed(1) + '%';
+    
+    return 'Unreported';
+  }
+
+  return (ramUsage * ramTotal).toFixed(1) + ' / ' + ramTotal.toString() + ' GB';
 }
 
 export default App

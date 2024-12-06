@@ -1,6 +1,5 @@
 import osUtils from 'os-utils';
 import os from 'os';
-import fs from 'fs';
 import { BrowserWindow } from 'electron';
 import { ipcWebContentsSend } from './util.js';
 
@@ -9,7 +8,7 @@ export async function getSystemResourceUsage(mainWindow: BrowserWindow) {
     const cpuUsage = await getCpuUsage();
     const ramUsage = getRamUsage();
 
-    ipcWebContentsSend("getSystemResourceUsage", mainWindow.webContents, {
+    ipcWebContentsSend('getSystemResourceUsage', mainWindow.webContents, {
 		cpuUsage,
 		ramUsage,
 	});

@@ -1,11 +1,23 @@
-.inputGridButtons {
+.inputGridCanvas {
+    display: block;
+    margin: 0.5rem auto;
+    aspect-ratio: 1 / 1;
+    height: min(100%, vh);
+    width: 60%;
+    min-width: 18rem;
+    min-height: 18rem;
+    image-rendering: pixelated;
+}
+
+.inputPanel {
     text-align: center;
 }
 
-.inputGridCanvas {
-    aspect-ratio: 1 / 1;
-    height: 100%;
-    width: min(100%, 100vh);
+#output {
+    background-color: #E0E0E0;
+    color: #0E0E0E;
+    padding: 6px 12px;
+    margin: 0 0.5rem;
 }
 
 button {
