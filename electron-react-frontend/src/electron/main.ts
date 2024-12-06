@@ -4,29 +4,28 @@ import { getPreloadPath, getUIPath } from './pathResolver.js';
 import { createMenu } from './menu.js';
 import { getSystemInfo, getSystemResourceUsage } from './systemResources.js';
 
-
 const POLLING_INTERVAL = 500;
 
 app.on('ready', () => {
-	const mainWindow = new BrowserWindow({
-		webPreferences: {
-			preload: getPreloadPath(),
-		},
-	});
-	
-	if (isDev()) {
-		mainWindow.loadURL('http://localhost:5123');
-	} else {
-		mainWindow.loadFile(getUIPath());
-	}
+  const mainWindow = new BrowserWindow({
+    webPreferences: {
+      preload: getPreloadPath(),
+    },
+  });
 
-	setInterval(async () => {
-		getSystemResourceUsage(mainWindow);
-	}, POLLING_INTERVAL);
+  if (isDev()) {
+    mainWindow.loadURL('http://localhost:5123');
+  } else {
+    mainWindow.loadFile(getUIPath());
+  }
 
-	ipcMainHandle('getSystemInfo', () => {
-		return getSystemInfo();
-	});
+  setInterval(async () => {
+    getSystemResourceUsage(mainWindow);
+  }, POLLING_INTERVAL);
 
-	createMenu(mainWindow);
+  ipcMainHandle('getSystemInfo', () => {
+    return getSystemInfo();
+  });
+
+  createMenu(mainWindow);
 });

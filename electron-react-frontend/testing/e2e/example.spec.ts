@@ -1,20 +1,21 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { test, expect, _electron } from '@playwright/test';
 
 let electronApp: Awaited<ReturnType<typeof _electron.launch>>;
 let mainPage: Awaited<ReturnType<typeof electronApp.firstWindow>>;
 
 async function waitForPreloadScript() {
-	return new Promise((resolve) => {
-		const interval = setInterval(async () => {
-			const electronBridge = await mainPage.evaluate(() => {
-				return (window as Window & { electron?: any }).electron;
-			});
-			if (electronBridge) {
-				clearInterval(interval);
-				resolve(true);
-			}
-		}, 100);
-	});
+  return new Promise((resolve) => {
+    const interval = setInterval(async () => {
+      const electronBridge = await mainPage.evaluate(() => {
+        return (window as Window & { electron? }).electron;
+      });
+      if (electronBridge) {
+        clearInterval(interval);
+        resolve(true);
+      }
+    }, 100);
+  });
 }
 
 test.beforeEach(async () => {
@@ -27,16 +28,17 @@ test.beforeEach(async () => {
 });
 
 test.afterEach(async () => {
-	await electronApp.close();
+  await electronApp.close();
 });
 
-test('custom menu', async ({ page }) => {
+test('custom menu', async () => {
   const menu = await electronApp.evaluate((electron) => {
     return electron.Menu.getApplicationMenu();
   });
   expect(menu).not.toBeNull;
-  expect(menu?.items).toHaveLength(2);
+  expect(menu?.items).toHaveLength(1);
+  expect(menu?.items[0].label).toBe('App');
   expect(menu?.items[0].submenu?.items).toHaveLength(2);
-  expect(menu?.items[1].submenu?.items).toHaveLength(3);
-  expect(menu?.items[1].label).toBe('View');
+  expect(menu?.items[0].submenu?.items[0].label).toBe('DevTools');
+  expect(menu?.items[0].submenu?.items[1].label).toBe('Quit');
 });

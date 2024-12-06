@@ -1,48 +1,49 @@
 .inputGridCanvas {
-    display: block;
-    margin: 0.5rem auto;
-    aspect-ratio: 1 / 1;
-    height: min(100%, vh);
-    width: 60%;
-    min-width: 18rem;
-    min-height: 18rem;
-    image-rendering: pixelated;
+  display: block;
+  margin: 0.5rem auto;
+  aspect-ratio: 1 / 1;
+  height: min(100%, vh);
+  width: 60%;
+  min-width: 18rem;
+  min-height: 18rem;
+  image-rendering: pixelated;
 }
 
 .inputPanel {
-    text-align: center;
+  text-align: center;
 }
 
 #output {
-    background-color: #E0E0E0;
-    color: #0E0E0E;
-    padding: 6px 12px;
-    margin: 0 0.5rem;
+  background-color: #e0e0e0;
+  color: #0e0e0e;
+  padding: 6px 12px;
+  margin: 0 0.5rem;
 }
 
 button {
-    cursor: pointer;
-    outline: 0;
-    color: #fff;
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-    display: inline-block;
-    font-weight: 400;
-    line-height: 1.5;
-    text-align: center;
-    border: 1px solid transparent;
-    padding: 6px 12px;
-    font-size: 16px;
-    border-radius: .25rem;
-    transition: color .15s ease-in-out,
-    background-color .15s ease-in-out,
-    border-color .15s ease-in-out,
-    box-shadow .15s ease-in-out;
-    margin: 0 0.5rem;
+  cursor: pointer;
+  outline: 0;
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  font-size: 16px;
+  border-radius: 0.25rem;
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+  margin: 0 0.5rem;
 }
 
 button :hover {
-    color: #fff;
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
+  color: #fff;
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
 }

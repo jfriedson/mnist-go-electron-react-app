@@ -1,7 +1,6 @@
-import './Chart.css'
+import './Chart.css';
 import { useMemo } from 'react';
 import { BaseChart } from './BaseChart';
-
 
 export type View = 'CPU' | 'RAM';
 
@@ -42,12 +41,16 @@ export function Chart(props: ChartProps) {
 
   return (
     <div>
-      <div className='chartTitle'>
+      <div className="chartTitle">
         <div>{props.view}</div>
         <div>{props.subTitle}</div>
       </div>
-      <div className='chart'>
-        <BaseChart data={preparedData} fill={color.fill} stroke={color.stroke} />
+      <div className="chart">
+        <BaseChart
+          data={preparedData}
+          fill={color.fill}
+          stroke={color.stroke}
+        />
       </div>
     </div>
   );
