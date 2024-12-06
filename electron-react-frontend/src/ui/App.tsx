@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import { Chart } from './Chart';
-import { getSystemInfo, subscribeGetSystemResourceUsage } from './systemResourcesInfo';
 import { InputGrid } from './InputGrid';
+import { GetSystemInfo, SubscribeGetSystemResourceUsage } from './SystemResourcesInfo';
 
 
-const systemResourceUsageDataPointCount = 10;
+const systemResourceUsageDataPointCount = 20;
 
 function App() {
-  const systemInfo = getSystemInfo();
-  const systemResourceUsage = subscribeGetSystemResourceUsage();
+  const systemInfo = GetSystemInfo();
+  const systemResourceUsage = SubscribeGetSystemResourceUsage();
   const [cpuUsageArray, setCpuUsageArray] = useState<number[]>([]);
   const [ramUsageArray, setRamUsageArray] = useState<number[]>([]);
   
@@ -18,7 +18,7 @@ function App() {
       return;
 
     const updateArray = (oldArray: number[], newValue: number) => {
-      var newArray = [...oldArray, newValue];
+      const newArray = [...oldArray, newValue];
       if (newArray.length > systemResourceUsageDataPointCount)
         newArray.shift();
       return newArray;
