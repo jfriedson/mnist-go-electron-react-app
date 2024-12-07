@@ -20,7 +20,8 @@ train_dataset = torchvision.datasets.MNIST('dataset/',
                                             transform=torchvision.transforms.ToTensor())
 train_loader = torch.utils.data.DataLoader(train_dataset,
                                            batch_size=batch_size, 
-                                        #    num_workers=num_workers,
+                                           num_workers=num_workers,
+                                           persistent_workers=True,
                                            shuffle=True)
 
 test_dataset = torchvision.datasets.MNIST('dataset/', 
@@ -29,7 +30,8 @@ test_dataset = torchvision.datasets.MNIST('dataset/',
                                           transform=torchvision.transforms.ToTensor())
 test_loader = torch.utils.data.DataLoader(test_dataset,
                                           batch_size=batch_size,
-                                        #   num_workers=num_workers,
+                                          num_workers=num_workers,
+                                          persistent_workers=True,
                                           shuffle=True)
 
 # Validate data
@@ -70,17 +72,25 @@ class Net(nn.Module):
 def train(model, device, optimizer, scheduler):
     model.train()
     total_loss = 0
+    correct = 0
     for input, target in tqdm(train_loader):
+        input, target = input.to(device), target.to(device)
+
         optimizer.zero_grad()
         output = model(input)
+
         loss = F.nll_loss(output, target)
         total_loss += loss.item()
+        pred = output.argmax(dim=1, keepdim=True)
+        correct += pred.eq(target.view_as(pred)).sum().item()
+
         loss.backward()
         optimizer.step()
         scheduler.step()
 
-    total_loss /= len(test_dataset)
-    print('loss: {:.4f}\n'.format(total_loss))
+    total_loss /= len(train_dataset)
+    print('loss: {:.4f}, acc: ({:.2f}%)\n'.format(
+       total_loss, 100. * correct / len(train_dataset)))
 
 def test(model, device):
     model.eval()
@@ -88,14 +98,17 @@ def test(model, device):
     correct = 0
     with torch.no_grad():
         for input, target in tqdm(test_loader):
+            input, target = input.to(device), target.to(device)
+
             output = model(input)
+
             total_loss += F.nll_loss(output, target, reduction='sum').item()
             pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     total_loss /= len(test_dataset)
     print('loss: {:.4f}, acc: ({:.2f}%)\n'.format(
-       total_loss, 100. * correct / len(test_data)))
+       total_loss, 100. * correct / len(test_dataset)))
 
 
 def main():
@@ -103,12 +116,15 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.7, 0.9))
 
     scheduler = OneCycleLR(optimizer, max_lr=lr,
-                           total_steps=int(((len(train_dataset)-1)//batch_size + 1)*epochs), 
-                           cycle_momentum=False)
+                    total_steps=int(((len(train_dataset)-1)//batch_size + 1)*epochs), 
+                    cycle_momentum=False)
     
-    for _ in range(epochs):
+    for epoch in range(epochs):
+        print('epoch {}\n'.format(epoch + 1))
         train(model, device, optimizer, scheduler)
         test(model, device)
 
-main()
-torch.save(model.state_dict(), "mnist_cnn.pt")
+    torch.save(model.state_dict(), "mnist.pt")
+
+if __name__ == '__main__':
+    main()
