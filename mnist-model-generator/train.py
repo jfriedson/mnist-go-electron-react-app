@@ -1,18 +1,26 @@
+import json
+from json import JSONEncoder
+
 import torch
 import torchvision
-import torch.nn as nn
+from torch.utils.data import Dataset
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import OneCycleLR
+
 from tqdm import tqdm
+
+from model import Model
 
 
 batch_size = 256
 num_workers = 8
+persistent_dataloaders = True if num_workers else False
 lr=1e-2
 epochs=5
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 train_dataset = torchvision.datasets.MNIST('dataset/', 
                                             train=True, 
@@ -21,7 +29,7 @@ train_dataset = torchvision.datasets.MNIST('dataset/',
 train_loader = torch.utils.data.DataLoader(train_dataset,
                                            batch_size=batch_size, 
                                            num_workers=num_workers,
-                                           persistent_workers=True,
+                                           persistent_workers=persistent_dataloaders,
                                            shuffle=True)
 
 test_dataset = torchvision.datasets.MNIST('dataset/', 
@@ -31,7 +39,7 @@ test_dataset = torchvision.datasets.MNIST('dataset/',
 test_loader = torch.utils.data.DataLoader(test_dataset,
                                           batch_size=batch_size,
                                           num_workers=num_workers,
-                                          persistent_workers=True,
+                                          persistent_workers=persistent_dataloaders,
                                           shuffle=True)
 
 # Validate data
@@ -42,31 +50,6 @@ test_loader = torch.utils.data.DataLoader(test_dataset,
 # print(example_datas[0][0])
 # print("Label: "+ str(labels[0]))
 # plt.show()
-
-
-class Net(nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 24, 5, 1)
-        self.conv2 = nn.Conv2d(24, 32, 3, 1)
-        self.fc1 = nn.Linear(800, 256)
-        self.fc2 = nn.Linear(256, 10)
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = F.max_pool2d(x, 2)
-        x = F.relu(x)
-        
-        x = self.conv2(x)
-        x = F.max_pool2d(x, 2)
-        x = F.relu(x)
-        
-        x = torch.flatten(x, 1)
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.fc2(x)
-        output = F.log_softmax(x, dim=1)
-        return output
 
 
 def train(model, device, optimizer, scheduler):
@@ -92,6 +75,7 @@ def train(model, device, optimizer, scheduler):
     print('loss: {:.4f}, acc: ({:.2f}%)\n'.format(
        total_loss, 100. * correct / len(train_dataset)))
 
+
 def test(model, device):
     model.eval()
     total_loss = 0
@@ -111,8 +95,16 @@ def test(model, device):
        total_loss, 100. * correct / len(test_dataset)))
 
 
+# https://stackoverflow.com/a/73251115
+class EncodeTensor(JSONEncoder, Dataset):
+    def default(self, obj):
+        if isinstance(obj, torch.Tensor):
+            return obj.cpu().detach().numpy().tolist()
+        return super(EncodeTensor, self).default(obj)
+
+
 def main():
-    model = Net().to(device)
+    model = Model().to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr, betas=(0.7, 0.9))
 
     scheduler = OneCycleLR(optimizer, max_lr=lr,
@@ -124,7 +116,10 @@ def main():
         train(model, device, optimizer, scheduler)
         test(model, device)
 
-    torch.save(model.state_dict(), "mnist.pt")
+    model.eval()
+    model.to("cpu")
+    with open('mnist2.json', 'w') as json_file:
+        json.dump(model.state_dict(), json_file, cls=EncodeTensor)
 
 if __name__ == '__main__':
     main()
