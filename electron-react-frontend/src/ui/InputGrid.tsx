@@ -11,6 +11,30 @@ export function InputGrid() {
     setOuput(' ');
   };
 
+  const sendInferReq = async () => {
+    const canvasCtx = canvasRef.current?.getContext("2d");
+    if (canvasCtx === undefined || canvasCtx === null)
+      return;
+
+    const imageData = canvasCtx.getImageData(0, 0, 28, 28, { colorSpace: "srgb" }).data;
+    // convert to grayscale by extracting a single color channel
+    const inputData = new Uint8ClampedArray(28 * 28);
+    for (let pixel = 0; pixel < 28 * 28; pixel++)
+      inputData[pixel] = imageData[pixel * 4]
+    
+    fetch('http://localhost:5122', {
+      method: 'POST',
+      body: inputData,
+      headers: new Headers({
+        'Content-Type': 'text/plain',
+        'Accept': 'text/plain',
+      })
+    })
+      .then(response => response.text())
+      .then(json => setOuput(json))
+      .catch(error => console.error(error))
+  }
+
   useEffect(() => {
     return initInputGrid();
   }, []);
@@ -26,7 +50,7 @@ export function InputGrid() {
       />
       <div className="inputPanel">
         <span id="output">{output}</span>
-        <button id="inferGridInput">Infer</button>
+        <button id="inferGridInput" onClick={sendInferReq}>Infer</button>
         <button id="clearGridInput" onClick={resetInputs}>
           Clear
         </button>
