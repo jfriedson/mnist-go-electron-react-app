@@ -1,0 +1,45 @@
+[
+    {
+        "type": "Conv2d",
+        "name": "conv1"
+    },
+    {
+        "type": "relu"
+    },
+    {
+        "type": "max_pool2d",
+        "kernel_size": 2
+    },
+
+    {
+        "type": "Conv2d",
+        "name": "conv2"
+    },
+    {
+        "type": "relu"
+    },
+    {
+        "type": "max_pool2d",
+        "kernel_size": 2
+    },
+
+    {
+        "type": "flatten",
+        "start_dim": 1
+    },
+    {
+        "type": "Linear",
+        "name": "fc1"
+    },
+    {
+        "type": "relu"
+    },
+    {
+        "type": "Linear",
+        "name": "fc2"
+    },
+    {
+        "type": "log_softmax",
+        "dim": 1
+    }
+]

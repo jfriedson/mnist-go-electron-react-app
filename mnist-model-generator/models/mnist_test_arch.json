@@ -1,0 +1,20 @@
+[
+    {
+        "type": "flatten",
+        "props": {
+            "start_dim": 1
+        }
+    },
+    {
+        "type": "Linear",
+        "props": {
+            "name": "fc1"
+        }
+    },
+    {
+        "type": "log_softmax",
+        "props": {
+            "dim": 1
+        }
+    }
+]

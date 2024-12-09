@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import OneCycleLR
+from torch.fx import symbolic_trace
 
 from tqdm import tqdm
 
@@ -112,13 +113,19 @@ def main():
                     cycle_momentum=False)
     
     for epoch in range(epochs):
-        print('epoch {}\n'.format(epoch + 1))
+        print('epoch {}'.format(epoch + 1))
         train(model, device, optimizer, scheduler)
         test(model, device)
 
     model.eval()
     model.to("cpu")
-    with open('mnist2.json', 'w') as json_file:
+    # TODO: dump model arch to file
+    # traced = symbolic_trace(model)
+    # print(traced.graph)
+    # for node in traced.graph.nodes:
+    #     for arg in node.args:
+    #         print(arg)
+    with open('models/mnist.json', 'w') as json_file:
         json.dump(model.state_dict(), json_file, cls=EncodeTensor)
 
 if __name__ == '__main__':
