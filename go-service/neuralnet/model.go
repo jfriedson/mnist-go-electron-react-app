@@ -5,22 +5,31 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module"
 )
 
 type Model interface {
-	Forward(*any) (any, error)
+	Forward(any) (any, error)
 }
 
 type model struct {
 	modules []module.Module
 }
 
-func (self *model) Forward(input *any) (any, error) {
-	// var next_input any = input
-	// var output any
+func (self *model) Forward(input any) (any, error) {
+	var output any
 
-	return "21", nil
+	for _, module := range self.modules {
+		var err error
+		output, err = module.Forward(input)
+		if err != nil {
+			return nil, err
+		}
+		input = output
+	}
+
+	return output, nil
 }
 
 type ModelConfig struct {
@@ -28,32 +37,40 @@ type ModelConfig struct {
 	ModelFile string
 }
 
-// TODO: build graph of modules at load time
 func LoadModel(config ModelConfig) *model {
-	arch := loadModelArch(config.ArchFile)
+	arch := modelarch.LoadModelArch(config.ArchFile)
 
 	modelBytes, err := os.ReadFile(config.ModelFile)
 	if err != nil {
 		panic(err)
 	}
 
-	var moduleParams map[string]any
-	err = json.Unmarshal(modelBytes, &moduleParams)
+	var modulesParams modelarch.ModulesParams
+	err = json.Unmarshal(modelBytes, &modulesParams)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(moduleParams)
-
-	model := buildModel(arch, moduleParams)
+	model := buildModel(arch, modulesParams)
 
 	return model
 }
 
-func buildModel(arch ModelArch, moduleParam map[string]any) *model {
-	model := &model{
-		modules: []module.Module{module.NewFlatten()},
+func buildModel(arch modelarch.ModelArch, modulesParams modelarch.ModulesParams) *model {
+	modules := []module.Module{}
+
+	for moduleInfos := range arch.GetModuleInfos() {
+		switch moduleInfos.GetType() {
+		case "flatten":
+			modules = append(modules, module.NewFlatten(moduleInfos))
+		case "Linear":
+			modules = append(modules, module.NewLinear(moduleInfos, modulesParams))
+		case "log_softmax":
+			modules = append(modules, module.NewLogSoftmax(moduleInfos))
+		default:
+			panic(fmt.Sprintf("unrecognized module type: %s", moduleInfos.GetType()))
+		}
 	}
 
-	return model
+	return &model{modules}
 }

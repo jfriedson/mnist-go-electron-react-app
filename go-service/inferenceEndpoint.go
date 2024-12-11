@@ -31,16 +31,24 @@ func (self InferenceEndpoint) handler(w http.ResponseWriter, r *http.Request) {
 
 		output, err := self.model.Forward(input)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 
-		output, ok := output.(uint)
+		outputAssert, ok := output.([]float32)
 		if !ok {
-			panic("output is of invalid type")
+			panic("output is an invalid type")
 		}
 
-		fmt.Fprintf(w, fmt.Sprint(output))
+		var maxIdx int = 0
+		var maxVal float32 = outputAssert[0]
+		for i, v := range outputAssert {
+			if v > maxVal {
+				maxIdx = i
+				maxVal = v
+			}
+		}
+
+		fmt.Fprint(w, maxIdx)
 	default:
 		http.Error(w, "method not supported", http.StatusMethodNotAllowed)
 	}
@@ -58,18 +66,20 @@ func (self InferenceEndpoint) parseRequestBody(reqBody io.ReadCloser) ([]byte, e
 }
 
 func (self InferenceEndpoint) convertInput(inputBytes []byte) ([][]float32, error) {
-	if len(inputBytes) != 28*28 {
+	const imgDim = 28
+
+	if len(inputBytes) != imgDim*imgDim {
 		err := fmt.Errorf("invalid image size %d", len(inputBytes))
 		return nil, err
 	}
 
-	input := make([][]float32, 28, 28)
+	input := make([][]float32, imgDim, imgDim)
 	for idx, bodyByte := range inputBytes {
-		row := idx / 28
-		col := idx % 28
+		row := idx / imgDim
+		col := idx % imgDim
 
 		if col == 0 {
-			input[row] = make([]float32, 28, 28)
+			input[row] = make([]float32, imgDim, imgDim)
 		}
 
 		input[row][col] = float32(bodyByte) / 255.
