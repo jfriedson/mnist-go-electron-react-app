@@ -3,7 +3,7 @@ let drawingContext: CanvasRenderingContext2D;
 
 const clearColor = '#000000';
 const setColor = '#FFFFFF';
-const brushRadius = 0.7;
+const brushRadius = 0.9;
 
 let painting: boolean = false;
 
