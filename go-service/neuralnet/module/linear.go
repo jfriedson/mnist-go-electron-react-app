@@ -29,7 +29,7 @@ func (self *linear) Forward(inputAny any) (any, error) {
 	output := make([]float32, outFeatures)
 	for out := range outFeatures {
 		var z float32 = 0
-		for in := 0; in < inFeatures; in++ {
+		for in := range inFeatures {
 			z += self.weights[out][in] * input[in]
 		}
 		if self.bias != nil {

@@ -38,8 +38,8 @@ func (self *logsoftmax) Forward(inputAny any) (any, error) {
 	logsumexp := math.Log(sumexp)
 
 	output := make([]float32, length)
-	for i := range length {
-		output[i] = input[i] - max - float32(logsumexp)
+	for i, x := range input {
+		output[i] = x - max - float32(logsumexp)
 	}
 
 	return output, nil
