@@ -12,6 +12,15 @@
         }
     },
     {
+        "type": "relu"
+    },
+    {
+        "type": "Linear",
+        "props": {
+            "name": "fc2"
+        }
+    },
+    {
         "type": "log_softmax",
         "props": {
             "dim": 1
