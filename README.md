@@ -1,8 +1,9 @@
 ## Objectives of this Project
-- Showcase Go's concurrency to accelerate neural network calculations on the CPU and personally implement the matrix operations
+- Showcase Go's concurrency by accelerating a neural network's inference on the CPU in tensor operations
 - Electron app and React UI in typescript for the front end interface
 
 ![Screenshot of demo](showcase.png?raw=true)
 
 ### Architecture
-- Communication between the React UI and the Go service is done by piping the neural network's input from React to Electron's Main process through IPC and making a gRPC call from the Electron Main process to the Go server. The neural network's output is returned through the pipeline in reverse.
+- Currently, communication between the React UI and the Go service is done by making an HTTP Post request containing the MNIST input from the React UI. The neural network inference result is returned in the HTTP response and displayed by React.\
+This will pipeline will be offered alongside another option to pipe the MNIST input data from the React UI to Electron's Main process through IPC and use gRPC to invoke the neural network inference on the Go server from Electron Main process. The neural network's output will be returned through the pipeline.

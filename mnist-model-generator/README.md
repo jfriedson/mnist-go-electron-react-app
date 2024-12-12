@@ -1,5 +1,5 @@
 ## MNIST model generator
-Need a simple MNIST model so why not create one. Code and NN arch adapted from https://github.com/tuomaso/train_mnist_fast/blob/master/8_Final_00s76.ipynb
+Need an MNIST model so why not create one. Code and neural network architecture adapted from https://github.com/tuomaso/train_mnist_fast/blob/master/8_Final_00s76.ipynb
 
 ### Setup 
 conda create -n mnist
