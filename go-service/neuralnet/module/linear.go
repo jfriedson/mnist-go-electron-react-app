@@ -63,12 +63,12 @@ func NewLinear(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesP
 		panic("linear weights must be a two dimensional array")
 	}
 	if len(weights) < 1 {
-		panic("linear weights must have at least 1 layer")
+		panic("linear weights has dimension of length 0")
 	}
-	weightLayer0Dim := len(weights[0])
-	for _, weightLayer := range weights {
-		if len(weightLayer) != weightLayer0Dim {
-			panic("linear weight layers must be the same size")
+	weightDim0Len := len(weights[0])
+	for _, weightDim0 := range weights {
+		if len(weightDim0) != weightDim0Len {
+			panic("linear weight length must be consistent throughout dimension")
 		}
 	}
 

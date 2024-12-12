@@ -65,6 +65,8 @@ func buildModel(arch modelarch.ModelArch, modulesParams modelarch.ModulesParams)
 			modules = append(modules, module.NewFlatten(moduleInfos))
 		case "Linear":
 			modules = append(modules, module.NewLinear(moduleInfos, modulesParams))
+		case "relu":
+			modules = append(modules, module.NewRelu())
 		case "log_softmax":
 			modules = append(modules, module.NewLogSoftmax(moduleInfos))
 		default:

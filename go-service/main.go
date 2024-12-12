@@ -19,5 +19,8 @@ func main() {
 	http.HandleFunc("/", cors(inferenceEndpoint.handler))
 
 	fmt.Println("go-service listening on http://localhost:5122/")
-	http.ListenAndServe(":5122", nil)
+	err := http.ListenAndServe(":5122", nil)
+	if err != nil {
+		panic("error starting http server")
+	}
 }
