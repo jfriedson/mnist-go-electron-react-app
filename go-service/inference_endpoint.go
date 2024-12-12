@@ -23,7 +23,8 @@ func (self InferenceEndpoint) handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		input, err := self.convertInput(bodyBytes)
+		const imgDim int = 28
+		input, err := self.convertInput(bodyBytes, imgDim)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -65,25 +66,22 @@ func (self InferenceEndpoint) parseRequestBody(reqBody io.ReadCloser) ([]byte, e
 	return bodyBytes, err
 }
 
-func (self InferenceEndpoint) convertInput(inputBytes []byte) ([][]float32, error) {
-	const imgDim = 28
-
-	if len(inputBytes) != imgDim*imgDim {
-		err := fmt.Errorf("invalid image size %d", len(inputBytes))
+func (self InferenceEndpoint) convertInput(input []byte, imgDim int) ([][]float32, error) {
+	if len(input) != imgDim*imgDim {
+		err := fmt.Errorf("invalid image size %d", len(input))
 		return nil, err
 	}
 
-	input := make([][]float32, imgDim, imgDim)
-	for idx, bodyByte := range inputBytes {
-		row := idx / imgDim
-		col := idx % imgDim
+	output := make([][]float32, imgDim)
 
-		if col == 0 {
-			input[row] = make([]float32, imgDim, imgDim)
+	for y := 0; y < imgDim; y++ {
+		colAdj := y * imgDim
+		newRow := make([]float32, imgDim)
+		for x := 0; x < imgDim; x++ {
+			newRow[x] = float32(input[colAdj+x]) / 255.
 		}
-
-		input[row][col] = float32(bodyByte) / 255.
+		output[y] = newRow
 	}
 
-	return input, nil
+	return output, nil
 }
