@@ -60,6 +60,6 @@ func TestFlatten_Forward2DimFloat32(t *testing.T) {
 	}
 	expectedOutput := []float32{1, 2, 3, 4}
 	if slices.Compare(outputSlice, expectedOutput) != 0 {
-		t.Error("input must match output")
+		t.Error("output result does not match expectations")
 	}
 }

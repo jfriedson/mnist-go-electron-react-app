@@ -12,48 +12,24 @@ type flatten struct {
 	endDim   int
 }
 
-func (self *flatten) Forward(input any) (any, error) {
+func (self *flatten) Forward(inputAny any) (any, error) {
 	// assert input is 2D slice of float32 for the time being
-	inputAssert, ok := input.([][]float32)
+	input, ok := inputAny.([][]float32)
 	if !ok {
 		return nil, fmt.Errorf("for now, flatten input must be [][]float32")
 	}
 
-	output := make([]float32, len(inputAssert)*len(inputAssert[0]))
-	for rowIdx, row := range inputAssert {
-		rowMult := len(inputAssert) * rowIdx
-		for colIdx, col := range row {
-			output[rowMult+colIdx] = col
+	lengthDim0 := len(input)
+	lengthDim1 := len(input[0])
+	output := make([]float32, lengthDim0*lengthDim1)
+	for d0i := range lengthDim0 {
+		d0offset := lengthDim0 * d0i
+		for d1i := range lengthDim1 {
+			output[d0offset+d1i] = input[d0i][d1i]
 		}
 	}
 
 	return output, nil
-
-	// // 0 dim / scalar
-	// if reflect.TypeOf(input).Kind() != reflect.Slice {
-	// 	if self.startDim > 0 || self.endDim > 0 {
-	// 		return nil, fmt.Errorf("flatten input not of correct dimensionality")
-	// 	}
-	// 	return input, nil
-	// }
-
-	// output := []any{}
-
-	// layer := input
-	// for dim := 0; dim <= self.endDim || self.endDim == -1; dim++ {
-	// 	var ok bool
-	// 	layer, ok = layer.([]any)
-	// 	if !ok {
-	// 		if self.endDim == -1 {
-	// 			break
-	// 		} else {
-	// 			return nil, fmt.Errorf("flatten input not of correct dimensionality")
-	// 		}
-	// 	}
-
-	// }
-
-	// return output, nil
 }
 
 func NewFlatten(moduleInfo modelarch.ModuleInfo) *flatten {

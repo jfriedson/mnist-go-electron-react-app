@@ -12,33 +12,34 @@ type logsoftmax struct {
 	dim int
 }
 
-func (self *logsoftmax) Forward(input any) (any, error) {
+func (self *logsoftmax) Forward(inputAny any) (any, error) {
 	// assert input is 1D slice of float32 for the time being
-	inputAssert, ok := input.([]float32)
+	input, ok := inputAny.([]float32)
 	if !ok {
 		return nil, fmt.Errorf("for now, logsoftmax input must be []float32")
 	}
 
-	if len(inputAssert) <= 0 {
+	length := len(input)
+	if length <= 0 {
 		return nil, fmt.Errorf("logsoftmax input must have at least 1 element")
 	}
 
-	var max float32 = inputAssert[0]
-	for _, x := range inputAssert {
+	var max float32 = input[0]
+	for _, x := range input {
 		if x > max {
 			max = x
 		}
 	}
 
 	var sumexp float64 = 0
-	for _, x := range inputAssert {
+	for _, x := range input {
 		sumexp += math.Exp(float64(x - max))
 	}
 	logsumexp := math.Log(sumexp)
 
-	output := make([]float32, len(inputAssert))
-	for idx := range output {
-		output[idx] = inputAssert[idx] - max - float32(logsumexp)
+	output := make([]float32, length)
+	for i := range length {
+		output[i] = input[i] - max - float32(logsumexp)
 	}
 
 	return output, nil

@@ -7,23 +7,24 @@ import (
 type relu struct {
 }
 
-func (self *relu) Forward(input any) (any, error) {
+func (self *relu) Forward(inputAny any) (any, error) {
 	// assert input is 1D slice of float32 for the time being
-	inputAssert, ok := input.([]float32)
+	input, ok := inputAny.([]float32)
 	if !ok {
 		return nil, fmt.Errorf("for now, relu input must be []float32")
 	}
 
-	if len(inputAssert) <= 0 {
+	inputLen := len(input)
+	if inputLen <= 0 {
 		return nil, fmt.Errorf("relu input must have at least 1 element")
 	}
 
-	output := make([]float32, len(inputAssert))
-	for idx, in := range inputAssert {
-		if in >= 0 {
-			output[idx] = in
+	output := make([]float32, inputLen)
+	for i, x := range input {
+		if x >= 0 {
+			output[i] = x
 		} else {
-			output[idx] = 0
+			output[i] = 0
 		}
 	}
 

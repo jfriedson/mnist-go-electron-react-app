@@ -40,7 +40,8 @@ func (self InferenceEndpoint) handler(w http.ResponseWriter, r *http.Request) {
 			panic("output is an invalid type")
 		}
 
-		var maxIdx int = 0
+		// find max value of log_softmax result
+		var maxIdx int = 0 // index of max value is the result
 		var maxVal float32 = outputAssert[0]
 		for i, v := range outputAssert {
 			if v > maxVal {
@@ -74,12 +75,14 @@ func (self InferenceEndpoint) convertInput(input []byte, imgDim int) ([][]float3
 
 	output := make([][]float32, imgDim)
 
-	for y := 0; y < imgDim; y++ {
+	for y := range imgDim {
 		colAdj := y * imgDim
+
 		newRow := make([]float32, imgDim)
-		for x := 0; x < imgDim; x++ {
+		for x := range imgDim {
 			newRow[x] = float32(input[colAdj+x]) / 255.
 		}
+
 		output[y] = newRow
 	}
 
