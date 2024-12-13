@@ -2,9 +2,11 @@ package linalg
 
 import (
 	"fmt"
+
+	"github.com/jfriedson/mnist-go-electron-react-app/go-service/number"
 )
 
-type Mat[T Number] struct {
+type Mat[T number.Number] struct {
 	Data [][]T
 	Dims []int
 }

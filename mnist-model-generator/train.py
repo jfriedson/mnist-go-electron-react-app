@@ -121,10 +121,7 @@ def main():
     model.to("cpu")
     # TODO: dump model arch to file
     # traced = symbolic_trace(model)
-    # print(traced.graph)
-    # for node in traced.graph.nodes:
-    #     for arg in node.args:
-    #         print(arg)
+    # print(traced)
     with open('models/mnist.json', 'w') as json_file:
         json.dump(model.state_dict(), json_file, cls=EncodeTensor)
 

@@ -4,11 +4,11 @@
         "name": "conv1"
     },
     {
-        "type": "max_pool2d",
+        "type": "MaxPool2d",
         "kernel_size": 2
     },
     {
-        "type": "relu"
+        "type": "ReLU"
     },
 
     {
@@ -16,15 +16,15 @@
         "name": "conv2"
     },
     {
-        "type": "max_pool2d",
+        "type": "MaxPool2d",
         "kernel_size": 2
     },
     {
-        "type": "relu"
+        "type": "ReLU"
     },
 
     {
-        "type": "flatten",
+        "type": "Flatten",
         "start_dim": 1
     },
     {
@@ -32,14 +32,14 @@
         "name": "fc1"
     },
     {
-        "type": "relu"
+        "type": "ReLU"
     },
     {
         "type": "Linear",
         "name": "fc2"
     },
     {
-        "type": "log_softmax",
+        "type": "LogSoftmax",
         "dim": 1
     }
 ]

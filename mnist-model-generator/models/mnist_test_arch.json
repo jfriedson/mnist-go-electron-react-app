@@ -1,6 +1,6 @@
 [
     {
-        "type": "flatten",
+        "type": "Flatten",
         "props": {
             "start_dim": 1
         }
@@ -12,7 +12,7 @@
         }
     },
     {
-        "type": "relu"
+        "type": "ReLU"
     },
     {
         "type": "Linear",
@@ -21,7 +21,7 @@
         }
     },
     {
-        "type": "log_softmax",
+        "type": "LogSoftmax",
         "props": {
             "dim": 1
         }

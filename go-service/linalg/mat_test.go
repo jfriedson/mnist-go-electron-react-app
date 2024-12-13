@@ -16,11 +16,11 @@ func TestT(t *testing.T) {
 
 	expectedDims := []int{3, 2}
 	if slices.Compare(matT.Dims, expectedDims) != 0 {
-		t.Error("matT dims is incorrect")
+		t.Fatal("matT dims is incorrect")
 	}
 	expectedData := [][]int{{1, 2}, {1, 2}, {1, 2}}
 	if !reflect.DeepEqual(matT.Data, expectedData) {
-		t.Error("matT data is incorrect")
+		t.Fatal("matT data is incorrect")
 	}
 }
 
@@ -37,7 +37,7 @@ func TestAdd(t *testing.T) {
 
 	matAdd, err := mat1.Add(&mat2)
 	if err != nil {
-		t.Errorf("addition failed")
+		t.Fatal("addition failed")
 	}
 
 	expectedAdd := Mat[int]{
@@ -45,6 +45,6 @@ func TestAdd(t *testing.T) {
 		Dims: []int{3, 3},
 	}
 	if !reflect.DeepEqual(matAdd, expectedAdd) {
-		t.Error("Mat addition returned invalid result")
+		t.Fatal("Mat addition returned invalid result")
 	}
 }

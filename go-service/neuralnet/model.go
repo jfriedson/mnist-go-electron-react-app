@@ -62,13 +62,17 @@ func buildModel(arch modelarch.ModelArch, modulesParams modelarch.ModulesParams)
 	for moduleInfos := range arch.GetModuleInfos() {
 		switch moduleInfos.GetType() {
 		case "flatten":
+		case "Flatten":
 			modules = append(modules, module.NewFlatten(moduleInfos))
 		case "Linear":
 			modules = append(modules, module.NewLinear(moduleInfos, modulesParams))
-		case "relu":
-			modules = append(modules, module.NewRelu())
-		case "log_softmax":
-			modules = append(modules, module.NewLogSoftmax(moduleInfos))
+		case "LogSoftmax":
+			// not required for inference, but implemented anyways :)
+			// modules = append(modules, module.NewLogSoftmax(moduleInfos))
+		case "MaxPool2d":
+			modules = append(modules, module.NewMaxPool2d(moduleInfos))
+		case "ReLU":
+			modules = append(modules, module.NewReLU())
 		default:
 			panic(fmt.Sprintf("unrecognized module type: %s", moduleInfos.GetType()))
 		}
