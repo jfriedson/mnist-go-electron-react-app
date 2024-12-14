@@ -2,6 +2,7 @@ package module
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 )
@@ -14,18 +15,14 @@ type conv2d struct {
 // input is operated on in the format (channel, height, width)
 // output is formatted (channel, height, width)
 func (conv2d conv2d) Forward(inputPtr any) any {
-	inputPtrTyped, ok := inputPtr.(*[][][]float32)
-	if !ok {
-		input2D, ok := inputPtr.(*[][]float32)
-		if !ok {
-			panic("Conv2d: input must be a non-nil pointer to a 2D or 3D float32")
-		}
-		inputExtended := make([][][]float32, 1)
-		inputExtended[0] = *input2D
-		inputPtrTyped = &inputExtended
+	inputPtrVal := reflect.ValueOf(inputPtr)
+	if inputPtrVal.Kind() != reflect.Pointer || inputPtrVal.IsNil() {
+		panic("Conv2d: input must be non-nil pointer to [][][]float32")
 	}
 
-	input := *inputPtrTyped
+	inputAny := inputPtrVal.Elem().Interface()
+
+	input := inputAny.([][][]float32)
 
 	inChans := len(input)
 	inHeight := len(input[0])

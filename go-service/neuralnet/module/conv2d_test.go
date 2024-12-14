@@ -5,48 +5,7 @@ import (
 	"testing"
 )
 
-func TestConv2d_Forward2Dim(t *testing.T) {
-	conv2d := &conv2d{
-		weights: [][][][]float32{
-			{
-				{
-					{0, 0, 0},
-					{0, 1, 0},
-					{0, 0, 0},
-				},
-			},
-		},
-		bias: []float32{1},
-	}
-
-	input := [][]float32{
-		{1, 2, 3, 4, 5},
-		{6, 7, 8, 9, 10},
-		{11, 12, 13, 14, 15},
-		{16, 17, 18, 19, 20},
-		{21, 22, 23, 24, 25},
-	}
-
-	output := conv2d.Forward(&input)
-
-	outputSlice, ok := output.([][][]float32)
-	if !ok {
-		t.Fatal("failed to assert output type")
-	}
-
-	expectedOutput := [][][]float32{
-		{
-			{8, 9, 10},
-			{13, 14, 15},
-			{18, 19, 20},
-		},
-	}
-	if !reflect.DeepEqual(outputSlice, expectedOutput) {
-		t.Fatal("output result does not match expectations")
-	}
-}
-
-func TestConv2d_Forward3Dim(t *testing.T) {
+func TestConv2d_Forward(t *testing.T) {
 	conv2d := &conv2d{
 		weights: [][][][]float32{
 			{
@@ -113,34 +72,7 @@ func TestConv2d_Forward3Dim(t *testing.T) {
 	}
 }
 
-func BenchmarkConv2d2D(b *testing.B) {
-	conv2d := &conv2d{
-		weights: [][][][]float32{
-			{
-				{
-					{0, 0, 0},
-					{0, 1, 0},
-					{0, 0, 0},
-				},
-			},
-		},
-		bias: []float32{1},
-	}
-
-	input := [][]float32{
-		{1, 2, 3, 4, 5},
-		{6, 7, 8, 9, 10},
-		{11, 12, 13, 14, 15},
-		{16, 17, 18, 19, 20},
-		{21, 22, 23, 24, 25},
-	}
-
-	for range b.N {
-		conv2d.Forward(&input)
-	}
-}
-
-func BenchmarkConv2d3D(b *testing.B) {
+func BenchmarkConv2d(b *testing.B) {
 	conv2d := &conv2d{
 		weights: [][][][]float32{
 			{
