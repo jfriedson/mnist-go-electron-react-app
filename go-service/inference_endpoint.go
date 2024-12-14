@@ -65,13 +65,14 @@ func (self InferenceEndpoint) parseRequestBody(reqBody io.ReadCloser) ([]byte, e
 	return bodyBytes, err
 }
 
-func (self InferenceEndpoint) convertInput(input []byte, imgDim int) ([][]float32, error) {
+func (self InferenceEndpoint) convertInput(input []byte, imgDim int) ([][][]float32, error) {
 	if len(input) != imgDim*imgDim {
 		err := fmt.Errorf("invalid image size %d", len(input))
 		return nil, err
 	}
 
-	output := make([][]float32, imgDim)
+	output := make([][][]float32, 1)
+	output[0] = make([][]float32, imgDim)
 
 	for y := range imgDim {
 		colAdj := y * imgDim
@@ -81,7 +82,7 @@ func (self InferenceEndpoint) convertInput(input []byte, imgDim int) ([][]float3
 			newRow[x] = float32(input[colAdj+x]) / 255.
 		}
 
-		output[y] = newRow
+		output[0][y] = newRow
 	}
 
 	return output, nil

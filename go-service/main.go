@@ -9,8 +9,8 @@ import (
 
 func main() {
 	modelConfig := neuralnet.ModelConfig{
-		ArchFile:  "../mnist-model-generator/models/mnist_test_arch.json",
-		ModelFile: "../mnist-model-generator/models/mnist_test.json",
+		ArchFile:  "../mnist-model-generator/models/mnist_arch.json",
+		ModelFile: "../mnist-model-generator/models/mnist.json",
 	}
 	model := neuralnet.LoadModel(modelConfig)
 
