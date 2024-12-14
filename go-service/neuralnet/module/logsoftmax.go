@@ -2,8 +2,8 @@ package module
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
+	"reflect"
 
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 )
@@ -12,16 +12,19 @@ type logsoftmax struct {
 	dim int
 }
 
-func (self *logsoftmax) Forward(inputAny any) (any, error) {
-	// assert input is 1D slice of float32 for the time being
-	input, ok := inputAny.([]float32)
-	if !ok {
-		return nil, fmt.Errorf("for now, logsoftmax input must be []float32")
+// TODO: convert to in-place op
+// TODO: function currently expects one dimensional input. calculate softmax across dim
+func (logsoftmax logsoftmax) Forward(inputPtr any) any {
+	inputPtrVal := reflect.ValueOf(inputPtr)
+	if inputPtrVal.Kind() != reflect.Pointer || inputPtrVal.IsNil() {
+		panic("LogSoftmax: input must be a non-nil pointer to []float32")
 	}
+
+	input := inputPtrVal.Elem().Interface().([]float32)
 
 	length := len(input)
 	if length <= 0 {
-		return nil, fmt.Errorf("logsoftmax input must have at least 1 element")
+		panic("LogSoftmax: input must have at least 1 element")
 	}
 
 	var max float32 = input[0]
@@ -42,7 +45,7 @@ func (self *logsoftmax) Forward(inputAny any) (any, error) {
 		output[i] = x - max - float32(logsumexp)
 	}
 
-	return output, nil
+	return output
 }
 
 func NewLogSoftmax(moduleInfo modelarch.ModuleInfo) *logsoftmax {
@@ -50,16 +53,16 @@ func NewLogSoftmax(moduleInfo modelarch.ModuleInfo) *logsoftmax {
 
 	raw, exists := moduleInfo.GetProp("dim")
 	if !exists {
-		panic("dim must be defined")
+		panic("LogSoftmax: dim must be defined")
 	} else {
 		err := json.Unmarshal(raw, &dim)
 		if err != nil {
-			panic("dim must be a number")
+			panic("LogSoftmax: dim must be a number")
 		}
 	}
 
 	if dim < 0 {
-		panic("start_dim must be 0 or greater")
+		panic("LogSoftmax: start_dim must be 0 or greater")
 	}
 
 	return &logsoftmax{dim}

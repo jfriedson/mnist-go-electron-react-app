@@ -3,6 +3,7 @@ package module
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 )
@@ -12,27 +13,55 @@ type flatten struct {
 	endDim   int
 }
 
-func (self *flatten) Forward(inputAny any) (any, error) {
-	// assert input is 2D slice of float32 for the time being
-	input, ok := inputAny.([][]float32)
-	if !ok {
-		return nil, fmt.Errorf("for now, flatten input must be [][]float32")
+// TODO: function currently flattens all layers. flatten only specified layers
+func (flatten flatten) Forward(inputPtr any) any {
+	inputPtrVal := reflect.ValueOf(inputPtr)
+	if inputPtrVal.Kind() != reflect.Pointer || inputPtrVal.IsNil() {
+		panic("Flatten: input must be a non-nil pointer")
 	}
 
-	lengthDim0 := len(input)
-	lengthDim1 := len(input[0])
-	output := make([]float32, lengthDim0*lengthDim1)
-	for d0i := range lengthDim0 {
-		d0offset := lengthDim0 * d0i
-		for d1i := range lengthDim1 {
-			output[d0offset+d1i] = input[d0i][d1i]
+	input := inputPtrVal.Elem().Interface()
+	inputVal := reflect.ValueOf(input)
+	if inputVal.Kind() == reflect.Float32 {
+		return inputVal.Interface()
+	}
+
+	// output := []any{}
+	output := []float32{}
+
+	type qEl struct {
+		val reflect.Value
+		// depth int
+	}
+	q := []qEl{{inputVal /*0*/}}
+
+	for len(q) > 0 {
+		cur := q[0]
+		q = q[1:]
+
+		switch cur.val.Kind() {
+		case reflect.Array, reflect.Slice:
+			for i := range cur.val.Len() {
+				el := cur.val.Index(i)
+
+				switch el.Kind() {
+				case reflect.Array, reflect.Slice:
+					q = append(q, qEl{el /*, el.depth + 1*/})
+				case reflect.Float32:
+					output = append(output, el.Interface().(float32))
+				default:
+					panic(fmt.Sprintf("Flatten: invalid type %v", el.Kind()))
+				}
+			}
+		default:
+			panic(fmt.Sprintf("Flatten: expected a slice but got %v", cur.val.Kind()))
 		}
 	}
 
-	return output, nil
+	return output
 }
 
-func NewFlatten(moduleInfo modelarch.ModuleInfo) *flatten {
+func NewFlatten(moduleInfo modelarch.ModuleInfo) flatten {
 	var startDim, endDim int
 
 	raw, exists := moduleInfo.GetProp("start_dim")
@@ -41,7 +70,7 @@ func NewFlatten(moduleInfo modelarch.ModuleInfo) *flatten {
 	} else {
 		err := json.Unmarshal(raw, &startDim)
 		if err != nil {
-			panic("start_dim must be a number")
+			panic("Flatten: start_dim must be a number")
 		}
 	}
 
@@ -51,21 +80,21 @@ func NewFlatten(moduleInfo modelarch.ModuleInfo) *flatten {
 	} else {
 		err := json.Unmarshal(raw, &endDim)
 		if err != nil {
-			panic("end_dim must be a number")
+			panic("Flatten: end_dim must be a number")
 		}
 	}
 
 	if startDim < 0 {
-		panic("start_dim must be 0 or greater")
+		panic("Flatten: start_dim must be 0 or greater")
 	}
 
 	if endDim < -1 {
-		panic("start_dim must be -1 or greater")
+		panic("Flatten: start_dim must be -1 or greater")
 	}
 
 	if endDim > -1 && startDim <= endDim {
-		panic("end_dim must be equal to or greater than start_dim if end_dim is not -1")
+		panic("Flatten: end_dim must be greater than start_dim if end_dim is not -1")
 	}
 
-	return &flatten{startDim, endDim}
+	return flatten{startDim, endDim}
 }

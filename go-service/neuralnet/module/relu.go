@@ -2,35 +2,58 @@ package module
 
 import (
 	"fmt"
+	"reflect"
 )
 
-type relu struct {
-}
+type relu struct{}
 
-func (self *relu) Forward(inputAny any) (any, error) {
-	// assert input is 1D slice of float32 for the time being
-	input, ok := inputAny.([]float32)
-	if !ok {
-		return nil, fmt.Errorf("for now, relu input must be []float32")
+// in-place op
+func (relu relu) Forward(inputPtr any) any {
+	inputPtrVal := reflect.ValueOf(inputPtr)
+	if inputPtrVal.Kind() != reflect.Pointer || inputPtrVal.IsNil() {
+		panic("ReLU: input must be a non-nil pointer")
 	}
 
-	inputLen := len(input)
-	if inputLen <= 0 {
-		return nil, fmt.Errorf("relu input must have at least 1 element")
+	input := inputPtrVal.Elem().Interface()
+	inputVal := reflect.ValueOf(input)
+	if inputVal.Kind() == reflect.Float32 {
+		if inputVal.Float() < 0 {
+			inputVal.SetFloat(0)
+		}
+		return nil
 	}
 
-	output := make([]float32, inputLen)
-	for i, x := range input {
-		if x >= 0 {
-			output[i] = x
-		} else {
-			output[i] = 0
+	var stack []reflect.Value
+	stack = append(stack, inputVal)
+
+	for len(stack) > 0 {
+		cur := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		switch cur.Kind() {
+		case reflect.Array, reflect.Slice:
+			for i := range cur.Len() {
+				el := cur.Index(i)
+
+				switch el.Kind() {
+				case reflect.Array, reflect.Slice:
+					stack = append(stack, el)
+				case reflect.Float32:
+					if el.Float() < 0 {
+						el.SetZero()
+					}
+				default:
+					panic(fmt.Sprintf("ReLU: invalid type %v", el.Kind()))
+				}
+			}
+		default:
+			panic(fmt.Sprintf("ReLU: expected a slice but got %v", cur.Kind()))
 		}
 	}
 
-	return output, nil
+	return nil
 }
 
-func NewRelu() *relu {
-	return &relu{}
+func NewReLU() relu {
+	return relu{}
 }

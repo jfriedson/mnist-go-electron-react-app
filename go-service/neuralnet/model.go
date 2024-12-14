@@ -10,26 +10,31 @@ import (
 )
 
 type Model interface {
-	Forward(any) (any, error)
+	Forward(any) any
 }
 
 type model struct {
 	modules []module.Module
 }
 
-func (self *model) Forward(input any) (any, error) {
+func (self model) Forward(input any) any {
 	var output any
 
 	for _, module := range self.modules {
-		var err error
-		output, err = module.Forward(input)
-		if err != nil {
-			return nil, err
+		fmt.Println(input)
+
+		output = module.Forward(&input)
+
+		// inplace modifiers have nil output
+		if output != nil {
+			input = output
 		}
-		input = output
 	}
 
-	return output, nil
+	if output == nil {
+		output = input
+	}
+	return output
 }
 
 type ModelConfig struct {
@@ -61,7 +66,6 @@ func buildModel(arch modelarch.ModelArch, modulesParams modelarch.ModulesParams)
 
 	for moduleInfos := range arch.GetModuleInfos() {
 		switch moduleInfos.GetType() {
-		case "flatten":
 		case "Flatten":
 			modules = append(modules, module.NewFlatten(moduleInfos))
 		case "Linear":

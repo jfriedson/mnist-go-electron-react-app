@@ -2,7 +2,7 @@ package module
 
 import (
 	"encoding/json"
-	"fmt"
+	"reflect"
 
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 )
@@ -12,40 +12,41 @@ type linear struct {
 	bias    []float32
 }
 
-func (self *linear) Forward(inputAny any) (any, error) {
-	// assert input is 1D slice of float32 for the time being
-	input, ok := inputAny.([]float32)
-	if !ok {
-		return nil, fmt.Errorf("for now, linear input must be []float32")
+func (linear linear) Forward(inputPtr any) any {
+	inputPtrVal := reflect.ValueOf(inputPtr)
+	if inputPtrVal.Kind() != reflect.Pointer || inputPtrVal.IsNil() {
+		panic("Linear: input must be non-nil pointer to []float32")
 	}
 
-	inFeatures := len(self.weights[0])
+	input := inputPtrVal.Elem().Interface().([]float32)
+
+	inFeatures := len(linear.weights[0])
 	if len(input) != inFeatures {
-		return nil, fmt.Errorf("linear input size is incorrect")
+		panic("Linear: input size is incorrect")
 	}
 
 	// TODO: goroutine this puppy
-	outFeatures := len(self.weights)
+	outFeatures := len(linear.weights)
 	output := make([]float32, outFeatures)
 	for out := range outFeatures {
 		var z float32 = 0
 		for in := range inFeatures {
-			z += self.weights[out][in] * input[in]
+			z += linear.weights[out][in] * input[in]
 		}
-		if self.bias != nil {
-			z += self.bias[out]
+		if linear.bias != nil {
+			z += linear.bias[out]
 		}
 		output[out] = z
 	}
 
-	return output, nil
+	return output
 }
 
-func NewLinear(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesParams) *linear {
+func NewLinear(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesParams) linear {
 	var name string
 	raw, exists := moduleInfo.GetProp("name")
 	if !exists {
-		panic("linear name must be defined")
+		panic("Linear: name must be defined")
 	} else {
 		err := json.Unmarshal(raw, &name)
 		if err != nil {
@@ -55,22 +56,22 @@ func NewLinear(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesP
 
 	weightsRaw, exists := modulesParams[name+".weight"]
 	if !exists {
-		panic("linear weights must be defined")
+		panic("Linear: weights must be defined")
 	}
 	var weights [][]float32
 	err := json.Unmarshal(weightsRaw, &weights)
 	if err != nil {
-		panic("linear weights must be a two dimensional array")
+		panic("Linear: weights must be a two dimensional array")
 	}
 
 	outFeatures := len(weights)
 	if outFeatures < 1 {
-		panic("linear weights out has length 0")
+		panic("Linear: weights out has length 0")
 	}
 	inFeatures := len(weights[0])
 	for _, weightsDim1 := range weights {
 		if len(weightsDim1) != inFeatures {
-			panic("linear weights in_features must be consistent")
+			panic("Linear: weights in_features must be consistent")
 		}
 	}
 
@@ -79,13 +80,13 @@ func NewLinear(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesP
 	if exists {
 		err = json.Unmarshal(biasRaw, &bias)
 		if err != nil {
-			panic("linear bias must be a one dimensional array")
+			panic("Linear: bias must be a one dimensional array")
 		}
 
 		if len(bias) != outFeatures {
-			panic("linear bias size must match weight out_features")
+			panic("Linear: bias size must match weight out_features")
 		}
 	}
 
-	return &linear{weights, bias}
+	return linear{weights, bias}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet"
 )
@@ -30,18 +31,15 @@ func (self InferenceEndpoint) handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		output, err := self.model.Forward(input)
-		if err != nil {
-			panic(err)
-		}
+		output := self.model.Forward(input)
 
 		outputAssert, ok := output.([]float32)
 		if !ok {
-			panic("output is an invalid type")
+			panic(fmt.Sprintf("output should be []float, not %v", reflect.TypeOf(output)))
 		}
 
-		// find max value of log_softmax result
-		var maxIdx int = 0 // index of max value is the result
+		// find idx of max value of log_softmax result
+		var maxIdx int = 0
 		var maxVal float32 = outputAssert[0]
 		for i, v := range outputAssert {
 			if v > maxVal {
