@@ -2,58 +2,77 @@ package module
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 )
 
 type maxpool2d struct {
-	dim int
+	kernel_size int
 }
 
 func (maxpool2d maxpool2d) Forward(inputPtr any) any {
-	return nil
-	// inputPtrVal := reflect.ValueOf(inputPtr)
-	// if inputPtrVal.Kind() != reflect.Pointer || inputPtrVal.IsNil() {
-	// 	return nil, fmt.Errorf("LogSoftmax: input must be a non-nil pointer")
-	// }
+	inputPtrVal := reflect.ValueOf(inputPtr)
+	if inputPtrVal.Kind() != reflect.Pointer || inputPtrVal.IsNil() {
+		panic("MaxPool2d: input must be non-nil pointer to [][][]float32")
+	}
 
-	// var max float32 = input[0]
-	// for _, x := range input {
-	// 	if x > max {
-	// 		max = x
-	// 	}
-	// }
+	inputAny := inputPtrVal.Elem().Interface()
 
-	// var sumexp float64 = 0
-	// for _, x := range input {
-	// 	sumexp += math.Exp(float64(x - max))
-	// }
-	// logsumexp := math.Log(sumexp)
+	input := inputAny.([][][]float32)
 
-	// output := make([]float32, length)
-	// for i, x := range input {
-	// 	output[i] = x - max - float32(logsumexp)
-	// }
+	outHeight := (len(input[0])-maxpool2d.kernel_size)/maxpool2d.kernel_size + 1
+	outWidth := (len(input[0][0])-maxpool2d.kernel_size)/maxpool2d.kernel_size + 1
+	chans := len(input)
 
-	// return output, nil
-}
-
-func NewMaxPool2d(moduleInfo modelarch.ModuleInfo) maxpool2d {
-	var dim int
-
-	raw, exists := moduleInfo.GetProp("dim")
-	if !exists {
-		panic("MaxPool2d: dim must be defined")
-	} else {
-		err := json.Unmarshal(raw, &dim)
-		if err != nil {
-			panic("MaxPool2d: dim must be a number")
+	// initialize the output image
+	output := make([][][]float32, chans)
+	for c := range chans {
+		output[c] = make([][]float32, outHeight)
+		for oR := range outHeight {
+			output[c][oR] = make([]float32, outWidth)
 		}
 	}
 
-	if dim < 0 {
-		panic("MaxPool2d: start_dim must be 0 or greater")
+	// TODO: goroutine this puppy
+	for c := range chans {
+		for oR := range outHeight {
+			for oC := range outWidth {
+				maxVal := input[c][oR*maxpool2d.kernel_size][oC*maxpool2d.kernel_size]
+				for kR := range maxpool2d.kernel_size {
+					for kC := range maxpool2d.kernel_size {
+						row := oR*maxpool2d.kernel_size + kR
+						col := oC*maxpool2d.kernel_size + kC
+						val := input[c][row][col]
+						if val > maxVal {
+							maxVal = val
+						}
+					}
+				}
+				output[c][oR][oC] = maxVal
+			}
+		}
 	}
 
-	return maxpool2d{dim}
+	return output
+}
+
+func NewMaxPool2d(moduleInfo modelarch.ModuleInfo) maxpool2d {
+	var kernel_size int
+
+	raw, exists := moduleInfo.GetProp("kernel_size")
+	if !exists {
+		panic("MaxPool2d: kernel_size must be defined")
+	} else {
+		err := json.Unmarshal(raw, &kernel_size)
+		if err != nil {
+			panic("MaxPool2d: kernel_size must be a number")
+		}
+	}
+
+	if kernel_size < 1 {
+		panic("MaxPool2d: kernel_size must be 1 or greater")
+	}
+
+	return maxpool2d{kernel_size}
 }
