@@ -1,7 +1,6 @@
 package module
 
 import (
-	"fmt"
 	"reflect"
 	"slices"
 	"testing"
@@ -30,7 +29,6 @@ func TestForward_Dim1(t *testing.T) {
 	input := []float32{1, 2, 3}
 	output := flatten.Forward(&input)
 
-	fmt.Println(output)
 	outputSlice, ok := output.([]float32)
 	if !ok {
 		t.Fatal("failed to assert output type")
@@ -49,7 +47,6 @@ func TestFlatten_ForwardDim2(t *testing.T) {
 	input := [][]float32{{1, 2}, {3, 4}}
 	output := flatten.Forward(&input)
 
-	fmt.Println(reflect.TypeOf(output))
 	outputSlice, ok := output.([]float32)
 	if !ok {
 		t.Fatal("failed to assert output type")
@@ -69,7 +66,6 @@ func TestFlatten_ForwardDim3(t *testing.T) {
 	input := [][][]float32{{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}}
 	output := flatten.Forward(&input)
 
-	fmt.Println(output)
 	outputSlice, ok := output.([]float32)
 	if !ok {
 		t.Fatal("failed to assert output type")

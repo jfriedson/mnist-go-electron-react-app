@@ -1,7 +1,6 @@
 package module
 
 import (
-	"fmt"
 	"slices"
 	"testing"
 )
@@ -20,7 +19,6 @@ func TestLogSoftmax_Forward1Dim(t *testing.T) {
 	}
 	expectedOutput := []float32{-3.4401896, -2.4401896, -1.4401897, -0.4401897}
 	if slices.Compare(outputSlice, expectedOutput) != 0 {
-		fmt.Print(outputSlice)
 		t.Fatal("output result does not match expectations")
 	}
 }

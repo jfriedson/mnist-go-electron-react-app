@@ -21,8 +21,6 @@ func (self model) Forward(input any) any {
 	var output any
 
 	for _, module := range self.modules {
-		fmt.Println(input)
-
 		output = module.Forward(&input)
 
 		// inplace modifiers have nil output

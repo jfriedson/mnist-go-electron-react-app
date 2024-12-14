@@ -1,7 +1,6 @@
 package module
 
 import (
-	"fmt"
 	"reflect"
 	"slices"
 	"testing"
@@ -18,7 +17,6 @@ func TestReLU_ForwardScalar(t *testing.T) {
 
 	var expectedOutput float32 = 0
 	if input != expectedOutput {
-		fmt.Println(input)
 		t.Fatal("output result does not match expectations")
 	}
 }
@@ -34,7 +32,6 @@ func TestReLU_Forward1Dim(t *testing.T) {
 
 	expectedOutput := []float32{0, 0, 1}
 	if slices.Compare(input, expectedOutput) != 0 {
-		fmt.Println(input)
 		t.Fatal("output result does not match expectations")
 	}
 }
