@@ -1,11 +1,15 @@
 [
     {
         "type": "Conv2d",
-        "name": "conv1"
+        "props": {
+            "name": "conv1"
+        }
     },
     {
         "type": "MaxPool2d",
-        "kernel_size": 2
+        "props": {
+            "kernel_size": 2
+        }
     },
     {
         "type": "ReLU"
@@ -13,11 +17,15 @@
 
     {
         "type": "Conv2d",
-        "name": "conv2"
+        "props": {
+            "name": "conv2"
+        }
     },
     {
         "type": "MaxPool2d",
-        "kernel_size": 2
+        "props": {
+            "kernel_size": 2
+        }
     },
     {
         "type": "ReLU"
@@ -25,21 +33,29 @@
 
     {
         "type": "Flatten",
-        "start_dim": 1
+        "props": {
+            "start_dim": 1
+        }
     },
     {
         "type": "Linear",
-        "name": "fc1"
+        "props": {
+            "name": "fc1"
+        }
     },
     {
         "type": "ReLU"
     },
     {
         "type": "Linear",
-        "name": "fc2"
+        "props": {
+            "name": "fc2"
+        }
     },
     {
         "type": "LogSoftmax",
-        "dim": 1
+        "props": {
+            "dim": 1
+        }
     }
 ]
