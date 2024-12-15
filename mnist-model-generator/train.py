@@ -53,7 +53,7 @@ test_loader = torch.utils.data.DataLoader(test_dataset,
 # plt.show()
 
 
-def train(model, device, optimizer, scheduler):
+def train(model, optimizer, scheduler):
     model.train()
     total_loss = 0
     correct = 0
@@ -77,7 +77,7 @@ def train(model, device, optimizer, scheduler):
        total_loss, 100. * correct / len(train_dataset)))
 
 
-def test(model, device):
+def valid(model):
     model.eval()
     total_loss = 0
     correct = 0
@@ -114,8 +114,8 @@ def main():
     
     for epoch in range(epochs):
         print('epoch {}'.format(epoch + 1))
-        train(model, device, optimizer, scheduler)
-        test(model, device)
+        train(model, optimizer, scheduler)
+        valid(model)
 
     model.eval()
     model.to("cpu")

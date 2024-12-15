@@ -37,7 +37,9 @@ export function Chart(props: ChartProps) {
         () => ({ value: undefined })
       ),
     ];
-  }, [props.data, props.maxDataPoints]);
+  // only trigger memo if data array values have changed
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.data.map((point) => ({ value: point })), props.maxDataPoints]);
 
   return (
     <div>

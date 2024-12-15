@@ -3,4 +3,4 @@ Listens for an HTTP Post request at root "/" containing a flattened 28x28 single
 
 ### Features
 - Dynamic typing by means of reflection and type assertion in the neuralnet modules allows for easy to read and performant code that is simple to call using an interface method
-- Modules accept pointers to their input so as to allow inplace operations to drastically improve memory use and minimize garbage to be collect
+- Modules accept pointers to their input so as to allow inplace operations to drastically improve memory use and minimize garbage to be collected

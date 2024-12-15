@@ -5,8 +5,6 @@ const clearColor = '#000000';
 const setColor = '#FFFFFF';
 const brushRadius = 0.9;
 
-let painting: boolean = false;
-
 export function initInputGrid(): UnsubscribeFunction {
   canvas = document.getElementById('inputGridCanvas')! as HTMLCanvasElement;
   drawingContext = canvas.getContext('2d')!;
@@ -15,14 +13,10 @@ export function initInputGrid(): UnsubscribeFunction {
 
   canvas.addEventListener('mousedown', placeBrush);
   canvas.addEventListener('mousemove', moveBrush);
-  canvas.addEventListener('mouseup', liftBrush);
-  canvas.addEventListener('mouseleave', liftBrush);
 
   return () => {
     canvas.removeEventListener('mousedown', placeBrush);
     canvas.removeEventListener('mousemove', moveBrush);
-    canvas.removeEventListener('mouseup', liftBrush);
-    canvas.removeEventListener('mouseleave', liftBrush);
   };
 }
 
@@ -32,39 +26,51 @@ export function clearInputGrid() {
 }
 
 const placeBrush = (ev: MouseEvent) => {
-  if (ev.button !== 0) return;
-
-  painting = true;
+  let color: string;
+  let radius: number;
+  if (ev.button === 0) {
+    color = setColor;
+    radius = brushRadius;
+  }
+  else if (ev.button === 2) {
+    color = clearColor;
+    radius = 1;
+  }
+  else return;
 
   const mouseX = ev.clientX - canvas.offsetLeft;
   const mouseY = ev.clientY - canvas.offsetTop;
   const canvasX = (mouseX * canvas.width) / canvas.clientWidth;
   const canvasY = (mouseY * canvas.height) / canvas.clientHeight;
 
-  fillCell(Math.round(canvasX), Math.round(canvasY));
+  fillCell(Math.round(canvasX), Math.round(canvasY), color, radius);
 };
 
 const moveBrush = (ev: MouseEvent) => {
-  if (ev.button !== 0 || painting === false) return;
+  let color: string;
+  let radius: number;
+  if (ev.buttons === 1) {
+    color = setColor;
+    radius = brushRadius;
+  } else if (ev.buttons === 2) {
+    color = clearColor;
+    radius = 1;
+  } else return;
 
   const mouseX = ev.clientX - canvas.offsetLeft;
   const mouseY = ev.clientY - canvas.offsetTop;
   const canvasX = (mouseX * canvas.width) / canvas.clientWidth;
   const canvasY = (mouseY * canvas.height) / canvas.clientHeight;
 
-  fillCell(Math.round(canvasX), Math.round(canvasY));
+  fillCell(Math.round(canvasX), Math.round(canvasY), color, radius);
 };
 
-const liftBrush = (ev: MouseEvent) => {
-  if (ev.button === 0) painting = false;
-};
-
-function fillCell(cellX: number, cellY: number) {
-  drawingContext.fillStyle = setColor;
+function fillCell(cellX: number, cellY: number, color: string, radius: number) {
+  drawingContext.fillStyle = color;
   drawingContext.fillRect(
-    cellX - brushRadius,
-    cellY - brushRadius,
-    brushRadius * 2,
-    brushRadius * 2
+    cellX - radius,
+    cellY - radius,
+    radius * 2,
+    radius * 2
   );
 }

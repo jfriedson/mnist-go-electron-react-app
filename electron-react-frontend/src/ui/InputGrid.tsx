@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import './InputGrid.css';
 import { clearInputGrid, initInputGrid } from './inputGridCanvas';
 
+const canvasDim = 28;
+
 export function InputGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [output, setOuput] = useState<string>(' ');
@@ -16,10 +18,12 @@ export function InputGrid() {
     if (canvasCtx === undefined || canvasCtx === null)
       return;
 
-    const imageData = canvasCtx.getImageData(0, 0, 28, 28, { colorSpace: "srgb" }).data;
+    const imageData = canvasCtx.getImageData(0, 0, canvasDim, canvasDim).data;
+    
     // convert to grayscale by extracting a single color channel
-    const inputData = new Uint8ClampedArray(28 * 28);
-    for (let pixel = 0; pixel < 28 * 28; pixel++)
+    const imagePixelCount = canvasDim * canvasDim;
+    const inputData = new Uint8ClampedArray(imagePixelCount);
+    for (let pixel = 0; pixel < imagePixelCount; pixel++)
       inputData[pixel] = imageData[pixel * 4]
     
     fetch('http://localhost:5122', {
