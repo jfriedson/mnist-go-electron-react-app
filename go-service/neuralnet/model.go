@@ -7,6 +7,7 @@ import (
 
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module"
+	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module/linear"
 )
 
 type Model interface {
@@ -69,7 +70,7 @@ func buildModel(arch modelarch.ModelArch, modulesParams modelarch.ModulesParams)
 		case "Flatten":
 			modules = append(modules, module.NewFlatten(moduleInfos))
 		case "Linear":
-			modules = append(modules, module.NewLinear(moduleInfos, modulesParams))
+			modules = append(modules, linear.NewLinearGoroutine(moduleInfos, modulesParams))
 		case "LogSoftmax":
 			// not required for inference, but implemented anyways :)
 			// modules = append(modules, module.NewLogSoftmax(moduleInfos))

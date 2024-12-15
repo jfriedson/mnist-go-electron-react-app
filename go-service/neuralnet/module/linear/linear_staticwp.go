@@ -1,18 +1,22 @@
-package module
+package linear
 
 import (
 	"encoding/json"
 	"reflect"
+	"runtime"
+	"sync"
 
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 )
 
-type linear struct {
+type linearStaticWp struct {
 	weights [][]float32
 	bias    []float32
+	jobs    chan linearStaticWpJob
+	wg      *sync.WaitGroup
 }
 
-func (linear linear) Forward(inputPtr any) any {
+func (linearStaticWp linearStaticWp) Forward(inputPtr any) any {
 	inputPtrVal := reflect.ValueOf(inputPtr)
 	if inputPtrVal.Kind() != reflect.Pointer || inputPtrVal.IsNil() {
 		panic("Linear: input must be non-nil pointer to []float32")
@@ -20,29 +24,48 @@ func (linear linear) Forward(inputPtr any) any {
 
 	input := inputPtrVal.Elem().Interface().([]float32)
 
-	inFeatures := len(linear.weights[0])
+	inFeatures := len(linearStaticWp.weights[0])
+	outFeatures := len(linearStaticWp.weights)
+
 	if len(input) != inFeatures {
 		panic("Linear: input size is incorrect")
 	}
 
-	// TODO: goroutine this puppy
-	outFeatures := len(linear.weights)
 	output := make([]float32, outFeatures)
+
 	for out := range outFeatures {
-		var z float32 = 0
-		for in := range inFeatures {
-			z += linear.weights[out][in] * input[in]
-		}
-		if linear.bias != nil {
-			z += linear.bias[out]
-		}
-		output[out] = z
+		linearStaticWp.wg.Add(1)
+		linearStaticWp.jobs <- linearStaticWpJob{input, &output, out}
 	}
+	linearStaticWp.wg.Wait()
 
 	return output
 }
 
-func NewLinear(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesParams) linear {
+type linearStaticWpJob struct {
+	input  []float32
+	output *[]float32
+	out    int
+}
+
+func (linearStaticWp linearStaticWp) linearStaticWpWorker() {
+	inFeatures := len(linearStaticWp.weights[0])
+
+	for j := range linearStaticWp.jobs {
+		var z float32 = 0
+		for in := range inFeatures {
+			z += linearStaticWp.weights[j.out][in] * j.input[in]
+		}
+		if linearStaticWp.bias != nil {
+			z += linearStaticWp.bias[j.out]
+		}
+		(*j.output)[j.out] = z
+
+		linearStaticWp.wg.Done()
+	}
+}
+
+func NewLinearStaticWp(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesParams) linearStaticWp {
 	var name string
 	raw, exists := moduleInfo.GetProp("name")
 	if !exists {
@@ -88,5 +111,15 @@ func NewLinear(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesP
 		}
 	}
 
-	return linear{weights, bias}
+	jobs := make(chan linearStaticWpJob, outFeatures)
+	var wg sync.WaitGroup
+
+	linearStaticWp := linearStaticWp{weights, bias, jobs, &wg}
+
+	numWorkers := runtime.NumCPU()
+	for range numWorkers {
+		go linearStaticWp.linearStaticWpWorker()
+	}
+
+	return linearStaticWp
 }
