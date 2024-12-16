@@ -1,20 +1,21 @@
-package module
+package conv2d
 
 import (
 	"encoding/json"
 	"reflect"
+	"sync"
 
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 )
 
-type conv2d struct {
+type conv2dGoroutine struct {
 	weights [][][][]float32
 	bias    []float32
 }
 
 // input is operated on in the format (channel, height, width)
 // output is formatted (channel, height, width)
-func (conv2d conv2d) Forward(inputPtr any) any {
+func (conv2dGoroutine conv2dGoroutine) Forward(inputPtr any) any {
 	inputPtrVal := reflect.ValueOf(inputPtr)
 	if inputPtrVal.Kind() != reflect.Pointer || inputPtrVal.IsNil() {
 		panic("Conv2d: input must be non-nil pointer to [][][]float32")
@@ -27,10 +28,10 @@ func (conv2d conv2d) Forward(inputPtr any) any {
 	inChans := len(input)
 	inHeight := len(input[0])
 	inWidth := len(input[0][0])
-	outChans := len(conv2d.weights)
-	filters := len(conv2d.weights[0])
-	kernelHeight := len(conv2d.weights[0][0])
-	kernelWidth := len(conv2d.weights[0][0][0])
+	outChans := len(conv2dGoroutine.weights)
+	filters := len(conv2dGoroutine.weights[0])
+	kernelHeight := len(conv2dGoroutine.weights[0][0])
+	kernelWidth := len(conv2dGoroutine.weights[0][0][0])
 
 	if inChans != filters {
 		panic("Conv2d: input channel does not match kernel count")
@@ -53,34 +54,46 @@ func (conv2d conv2d) Forward(inputPtr any) any {
 		}
 	}
 
-	// TODO: goroutine this puppy
+	var wg sync.WaitGroup
 	for oCh := range outChans {
-		for iCh := range inChans {
-			for oR := range outHeight {
-				for oC := range outWidth {
-					// apply kernel
-					for kR := range kernelHeight {
-						inR := oR + kR
-						for kC := range kernelWidth {
-							inC := oC + kC
-
-							output[oCh][oR][oC] += input[iCh][inR][inC] * conv2d.weights[oCh][iCh][kR][kC]
-						}
-					}
-				}
-			}
-		}
-		for y := range outHeight {
-			for x := range outWidth {
-				output[oCh][y][x] += conv2d.bias[oCh]
+		for oR := range outHeight {
+			for oC := range outWidth {
+				wg.Add(1)
+				go conv2dGoroutine.conv2dGoroutine(&wg, input, &output, oCh, oR, oC)
 			}
 		}
 	}
+	wg.Wait()
 
 	return output
 }
 
-func NewConv2d(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesParams) conv2d {
+func (conv2dGoroutine conv2dGoroutine) conv2dGoroutine(wg *sync.WaitGroup,
+	input [][][]float32, output *[][][]float32,
+	oCh, oR, oC int) {
+
+	defer wg.Done()
+
+	inChans := len(input)
+	kernelHeight := len(conv2dGoroutine.weights[0][0])
+	kernelWidth := len(conv2dGoroutine.weights[0][0][0])
+
+	var z float32 = 0
+	for iCh := range inChans {
+		// apply kernel
+		for kR := range kernelHeight {
+			inR := oR + kR
+			for kC := range kernelWidth {
+				inC := oC + kC
+
+				z += input[iCh][inR][inC] * conv2dGoroutine.weights[oCh][iCh][kR][kC]
+			}
+		}
+	}
+	(*output)[oCh][oR][oC] = z + conv2dGoroutine.bias[oCh]
+}
+
+func NewConv2dGoroutine(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesParams) conv2dGoroutine {
 	var name string
 	raw, exists := moduleInfo.GetProp("name")
 	if !exists {
@@ -147,5 +160,5 @@ func NewConv2d(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.ModulesP
 		panic("Conv2d: bias size must match weight out_channels")
 	}
 
-	return conv2d{weights, bias}
+	return conv2dGoroutine{weights, bias}
 }

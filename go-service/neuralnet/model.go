@@ -7,6 +7,7 @@ import (
 
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module"
+	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module/conv2d"
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module/linear"
 )
 
@@ -66,13 +67,13 @@ func buildModel(arch modelarch.ModelArch, modulesParams modelarch.ModulesParams)
 	for moduleInfos := range arch.GetModuleInfos() {
 		switch moduleInfos.GetType() {
 		case "Conv2d":
-			modules = append(modules, module.NewConv2d(moduleInfos, modulesParams))
+			modules = append(modules, conv2d.NewConv2dSequential(moduleInfos, modulesParams))
 		case "Flatten":
 			modules = append(modules, module.NewFlatten(moduleInfos))
 		case "Linear":
 			modules = append(modules, linear.NewLinearGoroutine(moduleInfos, modulesParams))
 		case "LogSoftmax":
-			// not required for inference, but implemented anyways :)
+			// not required for inference, but implemented anyways
 			// modules = append(modules, module.NewLogSoftmax(moduleInfos))
 		case "MaxPool2d":
 			modules = append(modules, module.NewMaxPool2d(moduleInfos))
