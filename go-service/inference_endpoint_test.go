@@ -9,8 +9,8 @@ import (
 
 func TestInferenceEndpoint_ConvertInput(t *testing.T) {
 	modelConfig := neuralnet.ModelConfig{
-		ArchFile:  "../mnist-model-generator/models/mnist_test_arch.json",
-		ModelFile: "../mnist-model-generator/models/mnist_test.json",
+		ArchFile:  "../mnist-model-generator/models/mnist_arch.json",
+		ModelFile: "../mnist-model-generator/models/mnist.json",
 	}
 	model := neuralnet.LoadModel(modelConfig)
 	inferenceEndpoint := InferenceEndpoint{model}
@@ -27,11 +27,14 @@ func TestInferenceEndpoint_ConvertInput(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedOutput := [][]float32{
-		{0, 0.003921569, 0.007843138},
-		{0, 0.2, 1},
-		{0.99215686, 0.99607843, 1},
+	expectedOutput := [][][]float32{
+		{
+			{0, 0.003921569, 0.007843138},
+			{0, 0.2, 1},
+			{0.99215686, 0.99607843, 1},
+		},
 	}
+
 	if !reflect.DeepEqual(output, expectedOutput) {
 		t.Fatal("output result does not match expectations")
 	}
