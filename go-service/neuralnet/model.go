@@ -67,7 +67,7 @@ func buildModel(arch modelarch.ModelArch, modulesParams modelarch.ModulesParams)
 	for moduleInfos := range arch.GetModuleInfos() {
 		switch moduleInfos.GetType() {
 		case "Conv2d":
-			modules = append(modules, conv2d.NewConv2dSequential(moduleInfos, modulesParams))
+			modules = append(modules, conv2d.NewConv2dGoroutine(moduleInfos, modulesParams))
 		case "Flatten":
 			modules = append(modules, module.NewFlatten(moduleInfos))
 		case "Linear":
