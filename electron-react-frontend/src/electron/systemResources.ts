@@ -24,7 +24,7 @@ export function getSystemInfo(): SystemInfo {
 
 function getCpuUsage(): Promise<number> {
   return osUtils.cpu
-    .usage()
+    .usage(500)
     .then((val) => +((val * 100) / osUtils.cpu.count()).toFixed(1));
 }
 
