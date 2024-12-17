@@ -16,9 +16,9 @@ export function GetSystemInfo(): SystemInfo | null {
 
 export function SubscribeGetSystemResourceUsage():
   | SystemResourceUsage
-  | undefined {
+  | null {
   const [systemResourceUsage, setSystemResourceUsage] =
-    useState<SystemResourceUsage>();
+    useState<SystemResourceUsage | null>(null);
 
   useEffect(() => {
     if (!window.electron) return;

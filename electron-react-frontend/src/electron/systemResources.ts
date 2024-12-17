@@ -1,11 +1,10 @@
-import osUtils from 'os-utils';
-import os from 'os';
+import osUtils from 'node-os-utils';
 import { BrowserWindow } from 'electron';
 import { ipcWebContentsSend } from './util.js';
 
 export async function getSystemResourceUsage(mainWindow: BrowserWindow) {
   const cpuUsage = await getCpuUsage();
-  const ramUsage = getRamUsage();
+  const ramUsage = await getRamUsage();
 
   ipcWebContentsSend('getSystemResourceUsage', mainWindow.webContents, {
     cpuUsage,
@@ -13,9 +12,9 @@ export async function getSystemResourceUsage(mainWindow: BrowserWindow) {
   });
 }
 
-export function getSystemInfo() {
-  const cpuModel = os.cpus()[0].model;
-  const totalMemoryGB = +(osUtils.totalmem() / 1_024).toFixed(1);
+export function getSystemInfo(): SystemInfo {
+  const cpuModel = osUtils.cpu.model();
+  const totalMemoryGB = +(osUtils.mem.totalMem() / (1024**3)).toFixed(1);
 
   return {
     cpuModel,
@@ -24,11 +23,13 @@ export function getSystemInfo() {
 }
 
 function getCpuUsage(): Promise<number> {
-  return new Promise((resolve) => {
-    osUtils.cpuUsage(resolve);
-  });
+  return osUtils.cpu
+    .usage()
+    .then((val) => +((val * 100) / osUtils.cpu.count()).toFixed(1));
 }
 
-function getRamUsage() {
-  return 1 - osUtils.freememPercentage();
+function getRamUsage(): Promise<number> {
+  return osUtils.mem
+    .used()
+    .then((memUsedInfo) => +(memUsedInfo.usedMemMb / 1024).toFixed(1));
 }

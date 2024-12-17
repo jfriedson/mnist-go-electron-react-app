@@ -8,7 +8,7 @@ Listens for an HTTP Post request at root "/" containing a flattened 28x28 single
 ### Analysis of multiple Goroutine strategies
 The following benchmarks were generated from the [modules](./neuralnet/module/) and [archived modules](./neuralnet/module/archive/) using tensor sizes in the MNIST model. The testing system has a 12 core AMD 7900x (64 MB L3 cache :shipit: ) and 64GB of RAM, so the minor scheduling and memory overhead that each goroutine needs is minimal on this system for these workloads. The MNIST model layers are very small in comparison to architectures of larger computer vision tasks - I would like to extend these tests to include much larger tensors.
 
-Much work went into optimizing memory access and usage without sacrificing computation. Stuff like using accumulation vars and limiting the use of indirection for slices and the dereferencing of pointers were able to shave off noticeable chunks of time.
+Much work went into optimizing memory access and usage without sacrificing computational performance. Stuff like using accumulation vars and limiting the use of indirection for slices and the dereferencing of pointers were able to shave off noticeable chunks of time.
 
 Additionally, the goroutine strategies will probably perform much better using a batched approach as opposed to the current goroutine-per-output method. The strategies with workerpools should mitigate the effect of the threading overhead; however, the channeling seems to add a decent amount of overhead itself as seen in the conv2d results.
 
