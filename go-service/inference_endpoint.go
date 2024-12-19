@@ -13,25 +13,25 @@ type InferenceEndpoint struct {
 	model neuralnet.Model
 }
 
-func (self InferenceEndpoint) handler(w http.ResponseWriter, r *http.Request) {
+func (inferenceEndpoint InferenceEndpoint) handler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodOptions:
 		w.Header().Add("Access-Control-Allow-Methods", "OPTIONS, POST")
 	case http.MethodPost:
-		bodyBytes, err := self.parseRequestBody(r.Body)
+		bodyBytes, err := inferenceEndpoint.parseRequestBody(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		const imgDim int = 28
-		input, err := self.convertInput(bodyBytes, imgDim)
+		input, err := inferenceEndpoint.convertInput(bodyBytes, imgDim)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		output := self.model.Forward(input)
+		output := inferenceEndpoint.model.Forward(input)
 
 		outputAssert, ok := output.([]float32)
 		if !ok {
@@ -54,7 +54,7 @@ func (self InferenceEndpoint) handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (self InferenceEndpoint) parseRequestBody(reqBody io.ReadCloser) ([]byte, error) {
+func (inferenceEndpoint InferenceEndpoint) parseRequestBody(reqBody io.ReadCloser) ([]byte, error) {
 	bodyBytes, err := io.ReadAll(reqBody)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (self InferenceEndpoint) parseRequestBody(reqBody io.ReadCloser) ([]byte, e
 	return bodyBytes, err
 }
 
-func (self InferenceEndpoint) convertInput(input []byte, imgDim int) ([][][]float32, error) {
+func (inferenceEndpoint InferenceEndpoint) convertInput(input []byte, imgDim int) ([][][]float32, error) {
 	if len(input) != imgDim*imgDim {
 		err := fmt.Errorf("invalid image size %d", len(input))
 		return nil, err

@@ -19,10 +19,10 @@ type model struct {
 	modules []module.Module
 }
 
-func (self model) Forward(input any) any {
+func (model model) Forward(input any) any {
 	var output any
 
-	for _, module := range self.modules {
+	for _, module := range model.modules {
 		output = module.Forward(&input)
 
 		// inplace modifiers have nil output

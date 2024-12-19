@@ -14,11 +14,11 @@ type moduleInfo struct {
 	Props map[string]json.RawMessage `json:"props"`
 }
 
-func (self moduleInfo) GetType() string {
-	return self.Type
+func (moduleInfo moduleInfo) GetType() string {
+	return moduleInfo.Type
 }
 
-func (self moduleInfo) GetProp(name string) (json.RawMessage, bool) {
-	val, exists := self.Props[name]
+func (moduleInfo moduleInfo) GetProp(name string) (json.RawMessage, bool) {
+	val, exists := moduleInfo.Props[name]
 	return val, exists
 }

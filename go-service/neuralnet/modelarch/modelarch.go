@@ -12,9 +12,9 @@ type ModelArch interface {
 
 type modelArch []moduleInfo
 
-func (self modelArch) GetModuleInfos() iter.Seq[ModuleInfo] {
+func (modelArch modelArch) GetModuleInfos() iter.Seq[ModuleInfo] {
 	return func(yield func(ModuleInfo) bool) {
-		for _, v := range self {
+		for _, v := range modelArch {
 			if !yield(v) {
 				return
 			}
