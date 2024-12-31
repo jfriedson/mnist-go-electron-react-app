@@ -1,4 +1,4 @@
-package module
+package relu
 
 import (
 	"reflect"
@@ -6,11 +6,11 @@ import (
 	"testing"
 )
 
-func TestReLU_ForwardScalar(t *testing.T) {
-	relu := &relu{}
+func TestReluGoroutine_ForwardScalar(t *testing.T) {
+	reluGoroutine := &reluGoroutine{}
 
 	var input float32 = -1
-	output := relu.Forward(&input)
+	output := reluGoroutine.Forward(&input)
 	if output != nil {
 		t.Fatal("ReLU: output is expected to be nil")
 	}
@@ -21,11 +21,11 @@ func TestReLU_ForwardScalar(t *testing.T) {
 	}
 }
 
-func TestReLU_Forward1Dim(t *testing.T) {
-	relu := &relu{}
+func TestReluGoroutine_Forward1Dim(t *testing.T) {
+	reluGoroutine := &reluGoroutine{}
 
 	input := []float32{-1, 0, 1}
-	output := relu.Forward(&input)
+	output := reluGoroutine.Forward(&input)
 	if output != nil {
 		t.Fatal("ReLU: output is expected to be nil")
 	}
@@ -36,11 +36,11 @@ func TestReLU_Forward1Dim(t *testing.T) {
 	}
 }
 
-func TestReLU_Forward2Dim(t *testing.T) {
-	relu := &relu{}
+func TestReluGoroutine_Forward2Dim(t *testing.T) {
+	reluGoroutine := &reluGoroutine{}
 
 	input := [][]float32{{-4, -3, -2}, {-1, 0, 1}, {2, 3, 4}}
-	output := relu.Forward(&input)
+	output := reluGoroutine.Forward(&input)
 	if output != nil {
 		t.Fatal("ReLU: output is expected to be nil")
 	}
@@ -51,11 +51,11 @@ func TestReLU_Forward2Dim(t *testing.T) {
 	}
 }
 
-func TestReLU_Forward3Dim(t *testing.T) {
-	relu := &relu{}
+func TestReluGoroutine_Forward3Dim(t *testing.T) {
+	reluGoroutine := &reluGoroutine{}
 
 	input := [][][]float32{{{-4, -3}, {-2, -1}}, {{0, 1}, {2, 3}}}
-	output := relu.Forward(&input)
+	output := reluGoroutine.Forward(&input)
 	if output != nil {
 		t.Fatal("ReLU: output is expected to be nil")
 	}
@@ -66,20 +66,11 @@ func TestReLU_Forward3Dim(t *testing.T) {
 	}
 }
 
-func BenchmarkReLU_ForwardDim1(b *testing.B) {
-	relu := &relu{}
-	var input float32 = 5
+func BenchmarkReluGoroutine_ForwardDim3(b *testing.B) {
+	reluGoroutine := &reluGoroutine{}
+	input := [][][]float32{{{-4, -3}, {-2, -1}, {0, 1}, {2, 3}}}
 
 	for range b.N {
-		relu.Forward(&input)
-	}
-}
-
-func BenchmarkReLU_ForwardDim2(b *testing.B) {
-	relu := &relu{}
-	input := [][]int{{-4, -3, -2}, {-1, 0, 1}, {2, 3, 4}}
-
-	for range b.N {
-		relu.Forward(&input)
+		reluGoroutine.Forward(&input)
 	}
 }

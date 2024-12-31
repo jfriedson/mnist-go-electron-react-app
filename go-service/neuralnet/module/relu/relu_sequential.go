@@ -1,30 +1,29 @@
-package module
+package relu
 
 import (
 	"fmt"
 	"reflect"
 )
 
-type relu struct{}
+type reluSequential struct{}
 
 // in-place op
-func (relu relu) Forward(inputPtr any) any {
+func (reluSequential reluSequential) Forward(inputPtr any) any {
 	inputPtrVal := reflect.ValueOf(inputPtr)
 	if inputPtrVal.Kind() != reflect.Pointer || inputPtrVal.IsNil() {
 		panic("ReLU: input must be a non-nil pointer")
 	}
 
-	input := inputPtrVal.Elem().Interface()
-	inputVal := reflect.ValueOf(input)
-	if inputVal.Kind() == reflect.Float32 {
-		if inputVal.Float() < 0 {
-			inputVal.SetFloat(0)
+	input := inputPtrVal.Elem()
+	if input.Kind() == reflect.Float32 {
+		if input.Float() < 0 {
+			input.SetZero()
 		}
 		return nil
 	}
 
 	var stack []reflect.Value
-	stack = append(stack, inputVal)
+	stack = append(stack, input)
 
 	for len(stack) > 0 {
 		cur := stack[len(stack)-1]
@@ -54,6 +53,6 @@ func (relu relu) Forward(inputPtr any) any {
 	return nil
 }
 
-func NewReLU() relu {
-	return relu{}
+func NewReluSequential() reluSequential {
+	return reluSequential{}
 }

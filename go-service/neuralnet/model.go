@@ -8,7 +8,11 @@ import (
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/modelarch"
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module"
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module/conv2d"
+	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module/flatten"
 	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module/linear"
+	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module/logsoftmax"
+	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module/maxpool2d"
+	"github.com/jfriedson/mnist-go-electron-react-app/go-service/neuralnet/module/relu"
 )
 
 type Model interface {
@@ -69,16 +73,15 @@ func buildModel(arch modelarch.ModelArch, modulesParams modelarch.ModulesParams)
 		case "Conv2d":
 			modules = append(modules, conv2d.NewConv2dGoroutine(moduleInfos, modulesParams))
 		case "Flatten":
-			modules = append(modules, module.NewFlatten(moduleInfos))
+			modules = append(modules, flatten.NewFlatten(moduleInfos))
 		case "Linear":
 			modules = append(modules, linear.NewLinearGoroutine(moduleInfos, modulesParams))
 		case "LogSoftmax":
-			// not required for inference, but implemented anyways
-			// modules = append(modules, module.NewLogSoftmax(moduleInfos))
+			modules = append(modules, logsoftmax.NewLogSoftmax(moduleInfos))
 		case "MaxPool2d":
-			modules = append(modules, module.NewMaxPool2d(moduleInfos))
+			modules = append(modules, maxpool2d.NewMaxPool2dSequential(moduleInfos))
 		case "ReLU":
-			modules = append(modules, module.NewReLU())
+			modules = append(modules, relu.NewReluGoroutine())
 		default:
 			panic(fmt.Sprintf("unrecognized module type: %s", moduleInfos.GetType()))
 		}

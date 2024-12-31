@@ -1,4 +1,4 @@
-package module
+package flatten
 
 import (
 	"encoding/json"

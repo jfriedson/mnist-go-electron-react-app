@@ -1,12 +1,12 @@
-package module
+package maxpool2d
 
 import (
 	"reflect"
 	"testing"
 )
 
-func TestMaxPool2d_Forward(t *testing.T) {
-	maxpool2d := &maxpool2d{
+func TestMaxpool2dSequential_Forward(t *testing.T) {
+	maxpool2dSequential := &maxpool2dSequential{
 		kernel_size: 2,
 	}
 
@@ -29,7 +29,7 @@ func TestMaxPool2d_Forward(t *testing.T) {
 		},
 	}
 
-	output := maxpool2d.Forward(&input)
+	output := maxpool2dSequential.Forward(&input)
 
 	outputSlice, ok := output.([][][]float32)
 	if !ok {
@@ -53,8 +53,8 @@ func TestMaxPool2d_Forward(t *testing.T) {
 	}
 }
 
-func BenchmarkMaxPool2d(b *testing.B) {
-	maxpool2d := &maxpool2d{
+func BenchmarkMaxpool2dSequential(b *testing.B) {
+	maxpool2dSequential := &maxpool2dSequential{
 		kernel_size: 2,
 	}
 
@@ -78,6 +78,6 @@ func BenchmarkMaxPool2d(b *testing.B) {
 	}
 
 	for range b.N {
-		maxpool2d.Forward(&input)
+		maxpool2dSequential.Forward(&input)
 	}
 }

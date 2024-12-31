@@ -1,4 +1,4 @@
-package module
+package logsoftmax
 
 import (
 	"slices"

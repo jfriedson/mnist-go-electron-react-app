@@ -1,4 +1,4 @@
-package module
+package flatten
 
 import (
 	"reflect"
@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestForwardScalar(t *testing.T) {
+func TestFlatten_ForwardScalar(t *testing.T) {
 	flatten := &flatten{
 		startDim: 0,
 		endDim:   -1,
@@ -20,7 +20,7 @@ func TestForwardScalar(t *testing.T) {
 	}
 }
 
-func TestForward_Dim1(t *testing.T) {
+func TestFlatten_ForwardDim1(t *testing.T) {
 	flatten := &flatten{
 		startDim: 0,
 		endDim:   -1,
@@ -76,20 +76,11 @@ func TestFlatten_ForwardDim3(t *testing.T) {
 	}
 }
 
-func BenchmarkFlatten_Scalar(b *testing.B) {
-	relu := &relu{}
-	var input float32 = 1
-
-	for range b.N {
-		relu.Forward(&input)
-	}
-}
-
 func BenchmarkFlatten_ForwardDim3(b *testing.B) {
-	relu := &relu{}
+	flatten := &flatten{}
 	input := [][][]float32{{{-4, -3}, {-2, -1}, {0, 1}, {2, 3}}}
 
 	for range b.N {
-		relu.Forward(&input)
+		flatten.Forward(&input)
 	}
 }
