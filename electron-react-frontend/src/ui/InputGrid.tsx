@@ -35,7 +35,7 @@ export function InputGrid() {
       })
     })
       .then(response => response.text())
-      .then(json => setOuput(json))
+      .then(text => setOuput(text))
       .catch(error => console.error(error))
   }
 

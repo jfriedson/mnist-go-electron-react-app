@@ -79,7 +79,7 @@ func buildModel(arch modelarch.ModelArch, modulesParams modelarch.ModulesParams)
 		case "LogSoftmax":
 			modules = append(modules, logsoftmax.NewLogSoftmax(moduleInfos))
 		case "MaxPool2d":
-			modules = append(modules, maxpool2d.NewMaxPool2dSequential(moduleInfos))
+			modules = append(modules, maxpool2d.NewMaxPool2dGoroutine(moduleInfos))
 		case "ReLU":
 			modules = append(modules, relu.NewReluGoroutine())
 		default:
