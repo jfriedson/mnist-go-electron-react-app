@@ -21,7 +21,7 @@ func TestLinear_Forward(t *testing.T) {
 	}
 
 	for range numWorkers {
-		go linearStaticWp.linearStaticWpWorker()
+		go linearStaticWp.worker()
 	}
 
 	input := []float32{1, 2, 3, 4}
@@ -39,8 +39,6 @@ func TestLinear_Forward(t *testing.T) {
 }
 
 func BenchmarkLinearStaticWp(b *testing.B) {
-	b.StopTimer()
-
 	weightDims := [2]int{256, 1024}
 	weights := make([][]float32, weightDims[0])
 	for o := range weightDims[0] {
@@ -62,18 +60,18 @@ func BenchmarkLinearStaticWp(b *testing.B) {
 
 	numWorkers := runtime.NumCPU()
 	var wg sync.WaitGroup
-	for range b.N {
-		jobs := make(chan linearStaticWpJob, weightDims[0])
 
-		linearStaticWp := linearStaticWp{weights, bias, jobs, &wg}
-		for range numWorkers {
-			go linearStaticWp.linearStaticWpWorker()
-		}
+	jobs := make(chan linearStaticWpJob, weightDims[0])
 
-		b.StartTimer()
-		linearStaticWp.Forward(&input)
-		b.StopTimer()
-
-		close(jobs)
+	linearStaticWp := linearStaticWp{weights, bias, jobs, &wg}
+	for range numWorkers {
+		go linearStaticWp.worker()
 	}
+
+	b.ResetTimer()
+	for range b.N {
+		linearStaticWp.Forward(&input)
+	}
+
+	close(jobs)
 }

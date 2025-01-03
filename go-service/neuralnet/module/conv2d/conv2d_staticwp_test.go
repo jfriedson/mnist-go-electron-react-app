@@ -39,7 +39,7 @@ func TestConv2dStaticWp_Forward(t *testing.T) {
 	}
 
 	for range numWorkers {
-		go conv2dStaticWp.conv2dStaticWpWorker()
+		go conv2dStaticWp.worker()
 	}
 
 	input := [][][]float32{
@@ -87,9 +87,7 @@ func TestConv2dStaticWp_Forward(t *testing.T) {
 }
 
 func BenchmarkConv2dStaticWp(b *testing.B) {
-	b.StopTimer()
-
-	weightDims := [4]int{24, 1, 5, 5}
+	weightDims := [4]int{32, 24, 3, 3}
 	weights := make([][][][]float32, weightDims[0])
 	for oCh := range weightDims[0] {
 		weights[oCh] = make([][][]float32, weightDims[1])
@@ -109,7 +107,7 @@ func BenchmarkConv2dStaticWp(b *testing.B) {
 		bias[oCh] = rand.Float32()
 	}
 
-	inputDims := [2]int{28, 28}
+	inputDims := [2]int{24, 24}
 	input := make([][][]float32, weightDims[1])
 	for iCh := range weightDims[1] {
 		input[iCh] = make([][]float32, inputDims[0])
@@ -123,18 +121,17 @@ func BenchmarkConv2dStaticWp(b *testing.B) {
 
 	numWorkers := runtime.NumCPU()
 	var wg sync.WaitGroup
-	for range b.N {
-		jobs := make(chan conv2dStaticWpJob, weightDims[0])
+	jobs := make(chan conv2dStaticWpJob, weightDims[0])
 
-		conv2dStaticWp := &conv2dStaticWp{weights, bias, jobs, &wg}
-		for range numWorkers {
-			go conv2dStaticWp.conv2dStaticWpWorker()
-		}
-
-		b.StartTimer()
-		conv2dStaticWp.Forward(&input)
-		b.StopTimer()
-
-		close(jobs)
+	conv2dStaticWp := &conv2dStaticWp{weights, bias, jobs, &wg}
+	for range numWorkers {
+		go conv2dStaticWp.worker()
 	}
+
+	b.ResetTimer()
+	for range b.N {
+		conv2dStaticWp.Forward(&input)
+	}
+
+	close(jobs)
 }

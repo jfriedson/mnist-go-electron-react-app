@@ -30,6 +30,7 @@ func BenchmarkLogSoftmax(b *testing.B) {
 
 	input := []float32{1, 2, 3, 4}
 
+	b.ResetTimer()
 	for range b.N {
 		logsoftmax.Forward(&input)
 	}

@@ -36,7 +36,7 @@ func (linearWorkerpool linearWorkerpool) Forward(inputPtr any) any {
 	numWorkers := runtime.NumCPU()
 	for range numWorkers {
 		wg.Add(1)
-		go linearWorkerpool.linearWorkerpoolWorker(jobs, &wg, input, &output)
+		go linearWorkerpool.worker(jobs, &wg, input, &output)
 	}
 
 	for out := range outFeatures {
@@ -53,7 +53,7 @@ type linearWorkerpoolJob struct {
 	out int
 }
 
-func (linearWorkerpool linearWorkerpool) linearWorkerpoolWorker(jobs <-chan linearWorkerpoolJob, wg *sync.WaitGroup,
+func (linearWorkerpool linearWorkerpool) worker(jobs <-chan linearWorkerpoolJob, wg *sync.WaitGroup,
 	input []float32, output *[]float32) {
 
 	defer wg.Done()
@@ -61,14 +61,16 @@ func (linearWorkerpool linearWorkerpool) linearWorkerpoolWorker(jobs <-chan line
 	inFeatures := len(linearWorkerpool.weights[0])
 
 	for j := range jobs {
+		out := j.out
+
 		var z float32 = 0
 		for in := range inFeatures {
-			z += linearWorkerpool.weights[j.out][in] * input[in]
+			z += linearWorkerpool.weights[out][in] * input[in]
 		}
 		if linearWorkerpool.bias != nil {
-			z += linearWorkerpool.bias[j.out]
+			z += linearWorkerpool.bias[out]
 		}
-		(*output)[j.out] = z
+		(*output)[out] = z
 	}
 }
 

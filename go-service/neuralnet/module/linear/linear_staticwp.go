@@ -48,18 +48,22 @@ type linearStaticWpJob struct {
 	out    int
 }
 
-func (linearStaticWp linearStaticWp) linearStaticWpWorker() {
+func (linearStaticWp linearStaticWp) worker() {
 	inFeatures := len(linearStaticWp.weights[0])
 
 	for j := range linearStaticWp.jobs {
+		input := j.input
+		output := j.output
+		out := j.out
+
 		var z float32 = 0
 		for in := range inFeatures {
-			z += linearStaticWp.weights[j.out][in] * j.input[in]
+			z += linearStaticWp.weights[out][in] * input[in]
 		}
 		if linearStaticWp.bias != nil {
-			z += linearStaticWp.bias[j.out]
+			z += linearStaticWp.bias[out]
 		}
-		(*j.output)[j.out] = z
+		(*output)[out] = z
 
 		linearStaticWp.wg.Done()
 	}
@@ -118,7 +122,7 @@ func NewLinearStaticWp(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.
 
 	numWorkers := runtime.NumCPU()
 	for range numWorkers {
-		go linearStaticWp.linearStaticWpWorker()
+		go linearStaticWp.worker()
 	}
 
 	return linearStaticWp

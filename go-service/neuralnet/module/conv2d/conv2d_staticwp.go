@@ -71,31 +71,35 @@ func (conv2dStaticWp conv2dStaticWp) Forward(inputPtr any) any {
 }
 
 type conv2dStaticWpJob struct {
-	input  [][][]float32
-	output *[][][]float32
-	oCh    int
-	oR     int
-	oC     int
+	input       [][][]float32
+	output      *[][][]float32
+	oCh, oR, oC int
 }
 
-func (conv2dStaticWp conv2dStaticWp) conv2dStaticWpWorker() {
+func (conv2dStaticWp conv2dStaticWp) worker() {
 	for j := range conv2dStaticWp.jobs {
-		inChans := len(j.input)
+		input := j.input
+		output := j.output
+		oCh := j.oCh
+		oR := j.oR
+		oC := j.oC
+
+		inChans := len(input)
 		kernelHeight := len(conv2dStaticWp.weights[0][0])
 		kernelWidth := len(conv2dStaticWp.weights[0][0][0])
 
 		var z float32 = 0
 		for iCh := range inChans {
 			for kR := range kernelHeight {
-				inR := j.oR + kR
+				inR := oR + kR
 				for kC := range kernelWidth {
-					inC := j.oC + kC
+					inC := oC + kC
 
-					z += j.input[iCh][inR][inC] * conv2dStaticWp.weights[j.oCh][iCh][kR][kC]
+					z += input[iCh][inR][inC] * conv2dStaticWp.weights[oCh][iCh][kR][kC]
 				}
 			}
 		}
-		(*j.output)[j.oCh][j.oR][j.oC] = z + conv2dStaticWp.bias[j.oCh]
+		(*output)[oCh][oR][oC] = z + conv2dStaticWp.bias[oCh]
 
 		conv2dStaticWp.wg.Done()
 	}
@@ -175,7 +179,7 @@ func NewConv2dStaticWp(moduleInfo modelarch.ModuleInfo, modulesParams modelarch.
 
 	numWorkers := runtime.NumCPU()
 	for range numWorkers {
-		go conv2dStaticWp.conv2dStaticWpWorker()
+		go conv2dStaticWp.worker()
 	}
 
 	return conv2dStaticWp

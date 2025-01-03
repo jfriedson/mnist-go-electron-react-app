@@ -74,8 +74,6 @@ func TestConv2dGoroutine_Forward(t *testing.T) {
 }
 
 func BenchmarkConv2dGoroutine(b *testing.B) {
-	b.StopTimer()
-
 	weightDims := [4]int{32, 24, 3, 3}
 	weights := make([][][][]float32, weightDims[0])
 	for oCh := range weightDims[0] {
@@ -110,9 +108,8 @@ func BenchmarkConv2dGoroutine(b *testing.B) {
 		}
 	}
 
+	b.ResetTimer()
 	for range b.N {
-		b.StartTimer()
 		conv2dGoroutine.Forward(&input)
-		b.StopTimer()
 	}
 }

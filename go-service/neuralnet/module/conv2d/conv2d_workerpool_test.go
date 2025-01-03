@@ -74,9 +74,7 @@ func TestConv2dWorkerpool_Forward(t *testing.T) {
 }
 
 func BenchmarkConv2dWorkerpool(b *testing.B) {
-	b.StopTimer()
-
-	weightDims := [4]int{24, 1, 5, 5}
+	weightDims := [4]int{32, 24, 3, 3}
 	weights := make([][][][]float32, weightDims[0])
 	for oCh := range weightDims[0] {
 		weights[oCh] = make([][][]float32, weightDims[1])
@@ -98,7 +96,7 @@ func BenchmarkConv2dWorkerpool(b *testing.B) {
 
 	conv2dWorkerpool := &conv2dWorkerpool{weights, bias}
 
-	inputDims := [2]int{28, 28}
+	inputDims := [2]int{24, 24}
 	input := make([][][]float32, weightDims[1])
 	for iCh := range weightDims[1] {
 		input[iCh] = make([][]float32, inputDims[0])
@@ -110,9 +108,8 @@ func BenchmarkConv2dWorkerpool(b *testing.B) {
 		}
 	}
 
+	b.ResetTimer()
 	for range b.N {
-		b.StartTimer()
 		conv2dWorkerpool.Forward(&input)
-		b.StopTimer()
 	}
 }

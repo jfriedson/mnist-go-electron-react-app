@@ -77,6 +77,7 @@ func BenchmarkMaxpool2dSequential(b *testing.B) {
 		},
 	}
 
+	b.ResetTimer()
 	for range b.N {
 		maxpool2dSequential.Forward(&input)
 	}

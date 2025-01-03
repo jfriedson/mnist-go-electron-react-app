@@ -26,8 +26,6 @@ func TestLinearGoroutine_Forward(t *testing.T) {
 }
 
 func BenchmarkLinearGoroutine(b *testing.B) {
-	b.StopTimer()
-
 	weightDims := [2]int{256, 1024}
 	weights := make([][]float32, weightDims[0])
 	for o := range weightDims[0] {
@@ -52,9 +50,8 @@ func BenchmarkLinearGoroutine(b *testing.B) {
 		input[i] = rand.Float32()
 	}
 
+	b.ResetTimer()
 	for range b.N {
-		b.StartTimer()
 		linearGoroutine.Forward(&input)
-		b.StopTimer()
 	}
 }

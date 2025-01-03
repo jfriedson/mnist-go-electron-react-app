@@ -61,7 +61,7 @@ func (conv2dWorkerpool conv2dWorkerpool) Forward(inputPtr any) any {
 	var wg sync.WaitGroup
 	for range numWorkers {
 		wg.Add(1)
-		go conv2dWorkerpool.conv2dWorkerpoolWorker(jobs, &wg, input, &output)
+		go conv2dWorkerpool.worker(jobs, &wg, input, &output)
 	}
 
 	for oCh := range outChans {
@@ -79,12 +79,10 @@ func (conv2dWorkerpool conv2dWorkerpool) Forward(inputPtr any) any {
 }
 
 type conv2dWorkerpoolJob struct {
-	oCh int
-	oR  int
-	oC  int
+	oCh, oR, oC int
 }
 
-func (conv2dWorkerpool conv2dWorkerpool) conv2dWorkerpoolWorker(jobs <-chan conv2dWorkerpoolJob, wg *sync.WaitGroup,
+func (conv2dWorkerpool conv2dWorkerpool) worker(jobs <-chan conv2dWorkerpoolJob, wg *sync.WaitGroup,
 	input [][][]float32, output *[][][]float32) {
 
 	defer wg.Done()
@@ -94,18 +92,22 @@ func (conv2dWorkerpool conv2dWorkerpool) conv2dWorkerpoolWorker(jobs <-chan conv
 	kernelWidth := len(conv2dWorkerpool.weights[0][0][0])
 
 	for j := range jobs {
+		oCh := j.oCh
+		oR := j.oR
+		oC := j.oC
+
 		var z float32 = 0
 		for iCh := range inChans {
 			for kR := range kernelHeight {
-				inR := j.oR + kR
+				inR := oR + kR
 				for kC := range kernelWidth {
-					inC := j.oC + kC
+					inC := oC + kC
 
-					z += input[iCh][inR][inC] * conv2dWorkerpool.weights[j.oCh][iCh][kR][kC]
+					z += input[iCh][inR][inC] * conv2dWorkerpool.weights[oCh][iCh][kR][kC]
 				}
 			}
 		}
-		(*output)[j.oCh][j.oR][j.oC] = z + conv2dWorkerpool.bias[j.oCh]
+		(*output)[oCh][oR][oC] = z + conv2dWorkerpool.bias[oCh]
 	}
 }
 

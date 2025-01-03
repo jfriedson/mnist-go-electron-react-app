@@ -70,6 +70,7 @@ func BenchmarkReluSequential_ForwardDim3(b *testing.B) {
 	reluSequential := &reluSequential{}
 	input := [][][]float32{{{-4, -3}, {-2, -1}, {0, 1}, {2, 3}}}
 
+	b.ResetTimer()
 	for range b.N {
 		reluSequential.Forward(&input)
 	}
