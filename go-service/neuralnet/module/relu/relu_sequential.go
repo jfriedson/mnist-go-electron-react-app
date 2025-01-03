@@ -14,16 +14,17 @@ func (reluSequential reluSequential) Forward(inputPtr any) any {
 		panic("ReLU: input must be a non-nil pointer")
 	}
 
-	input := inputPtrVal.Elem()
-	if input.Kind() == reflect.Float32 {
-		if input.Float() < 0 {
-			input.SetZero()
+	input := inputPtrVal.Elem().Interface()
+	inputVal := reflect.ValueOf(input)
+	if inputVal.Kind() == reflect.Float32 {
+		if inputVal.Float() < 0 {
+			inputVal.SetZero()
 		}
 		return nil
 	}
 
 	var stack []reflect.Value
-	stack = append(stack, input)
+	stack = append(stack, inputVal)
 
 	for len(stack) > 0 {
 		cur := stack[len(stack)-1]

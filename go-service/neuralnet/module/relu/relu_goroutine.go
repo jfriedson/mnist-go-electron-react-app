@@ -15,10 +15,11 @@ func (reluGoroutine reluGoroutine) Forward(inputPtr any) any {
 		panic("ReLU: input must be a non-nil pointer")
 	}
 
-	input := inputPtrVal.Elem()
-	if input.Kind() == reflect.Float32 {
-		if input.Float() < 0 {
-			input.SetZero()
+	input := inputPtrVal.Elem().Interface()
+	inputVal := reflect.ValueOf(input)
+	if inputVal.Kind() == reflect.Float32 {
+		if inputVal.Float() < 0 {
+			inputVal.SetZero()
 		}
 		return nil
 	}
@@ -26,7 +27,7 @@ func (reluGoroutine reluGoroutine) Forward(inputPtr any) any {
 	var wg sync.WaitGroup
 
 	wg.Add(1)
-	go reluGoroutine.reluGoroutine(&wg, input)
+	go reluGoroutine.reluGoroutine(&wg, inputVal)
 
 	wg.Wait()
 
